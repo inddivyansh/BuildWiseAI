@@ -172,9 +172,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
           </div>
 
           {/* JetBrains Banner Card with Teal Glow (Inspired by jetbrains.com) */}
-          <div className="mt-12 w-full max-w-5xl rounded-3xl bg-gradient-to-r from-[#0C1A24] via-[#09151E] to-[#080C14] border border-[#00F0FF]/30 p-8 sm:p-10 relative overflow-hidden text-left shadow-[0_0_40px_rgba(0,240,255,0.08)]">
+          <div className="mt-12 w-full max-w-5xl rounded-3xl bg-gradient-to-r from-[#0C1A24] via-[#09151E] to-[#080C14] border border-[#00F0FF]/30 p-8 sm:p-10 sm:pl-14 relative overflow-hidden text-left shadow-[0_0_40px_rgba(0,240,255,0.08)]">
             {/* Left Vertical Tab Tag */}
-            <div className="hidden sm:block absolute -left-7 top-1/2 -translate-y-1/2 -rotate-90 bg-[#00F0FF] text-black font-bold text-[10px] tracking-widest px-3 py-0.5 rounded-t uppercase">
+            <div className="hidden sm:block absolute left-0 top-1/2 -translate-y-1/2 -translate-x-[calc(50%-12px)] -rotate-90 bg-[#00F0FF] text-black font-bold text-[10px] tracking-widest px-3 py-0.5 rounded-t uppercase whitespace-nowrap origin-center">
               NBC 2016 Compliant
             </div>
 
@@ -245,9 +245,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         </div>
 
         {/* Deep JetBrains Purple Container with Featured Badge */}
-        <div className="rounded-3xl bg-[#0E0C1C] border border-[#271E4A] p-8 sm:p-12 relative overflow-hidden shadow-2xl">
+        <div className="rounded-3xl bg-[#0E0C1C] border border-[#271E4A] p-8 sm:p-12 sm:pl-14 relative overflow-hidden shadow-2xl">
           {/* Left Vertical Tab */}
-          <div className="hidden sm:block absolute -left-5 top-24 -rotate-90 bg-[#6B57FF] text-white font-bold text-[10px] tracking-widest px-3 py-0.5 rounded-t uppercase">
+          <div className="hidden sm:block absolute left-0 top-24 -translate-x-[calc(50%-12px)] -rotate-90 bg-[#6B57FF] text-white font-bold text-[10px] tracking-widest px-3 py-0.5 rounded-t uppercase whitespace-nowrap origin-center">
             Featured
           </div>
 
