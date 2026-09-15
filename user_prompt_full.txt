@@ -1,0 +1,127 @@
+<USER_REQUEST>
+For interactive demo current one is shit we need to do better 
+BUILDWISE — INTERACTIVE DEMO BLUEPRINT
+
+I want the "How It Works?" section to contain a REAL INTERACTIVE DEMO based on one deliberately designed sample architectural blueprint.
+
+This is NOT the real user workflow.
+
+It is a precomputed sample project whose purpose is to demonstrate, visually and interactively, how BuildWise detects a small number of architectural compliance problems.
+
+============================================================
+DEMO OBJECTIVE
+============================================================
+
+The visitor should understand BuildWise within 30–60 seconds:
+
+BLUEPRINT
+    ↓
+GEOMETRY EXTRACTION
+    ↓
+MEASUREMENTS
+    ↓
+NBC RULE
+    ↓
+VIOLATION
+    ↓
+VISUAL LOCATION
+    ↓
+HOW TO FIX IT
+
+Do NOT overwhelm the visitor with dozens of violations.
+
+The demo should intentionally contain approximately:
+
+2 clear violations
++
+several passing checks
+
+This makes the product understandable.
+
+============================================================
+1. CREATE A DEDICATED SAMPLE BLUEPRINT
+============================================================
+
+Create one clean, professional 2D architectural floor plan specifically for the interactive demo.
+
+It should look like a realistic architectural blueprint, NOT a random collection of rectangles.
+
+Prefer a small:
+
+Residential / small office floor plan
+
+with:
+
+- 2–3 bedrooms/offices
+- living/common area
+- kitchen
+- corridor
+- 1–2 bathrooms
+- doors
+- windows/openings
+- stairs if useful
+- clearly marked exit
+
+Keep the geometry simple enough that every demonstrated result is deterministic.
+
+The floor plan should contain:
+
+- walls
+- rooms
+- doors
+- openings
+- corridor
+- exit
+
+Use the existing CGM representation wherever possible.
+
+============================================================
+2. DELIBERATELY INTRODUCE 2 VIOLATIONS
+============================================================
+
+C
+<truncated 11074 bytes>
+e beautiful, convincing, interactive example.
+
+============================================================
+ACCEPTANCE CRITERIA
+============================================================
+
+The demo is complete only if:
+
+✓ Blueprint looks realistic
+✓ 2 deliberate violations exist
+✓ Several checks pass
+✓ Violations are clickable
+✓ Selecting violation highlights geometry
+✓ Measured value is visible
+✓ Required value comes from verified NBC rule
+✓ NBC clause/page is visible
+✓ Explanation is visible
+✓ Fix recommendation is visible
+✓ Demo is clearly labeled
+✓ Demo data is isolated
+✓ "Analyze Your Blueprint" goes to real upload
+✓ No demo data appears in real project workflow
+
+Build this as a polished product demonstration, not a static screenshot.
+
+START IMPLEMENTATION.
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-09-16T03:25:21+05:30.
+
+The user's current state is as follows:
+Active Document: c:\Users\divya\DataDrive\Study\IIIT_Pune\7th_Sem\Internship\BuildWiseAI\frontend\src\components\common\BuildingThumbnails.tsx (LANGUAGE_TSX)
+Cursor is on line: 1
+Other open documents:
+- c:\Users\divya\DataDrive\Study\IIIT_Pune\7th_Sem\Internship\BuildWiseAI\frontend\src\index.css (LANGUAGE_CSS)
+- c:\Users\divya\DataDrive\Study\IIIT_Pune\7th_Sem\Internship\BuildWiseAI\frontend\src\components\common\BuildingThumbnails.tsx (LANGUAGE_TSX)
+- c:\Users\divya\DataDrive\Study\IIIT_Pune\7th_Sem\Internship\BuildWiseAI\frontend\src\pages\ProjectsPage.tsx (LANGUAGE_TSX)
+- c:\Users\divya\DataDrive\Study\IIIT_Pune\7th_Sem\Internship\BuildWiseAI\frontend\src\components\common\Navbar.tsx (LANGUAGE_TSX)
+Browser State:
+  Page C829384FBF860656825BEABBA3C9D724 (BuildWise AI — Algorithmic Blueprint & Regulatory Compliance Platform) - http://localhost:5173/ [ACTIVE]
+    Viewport: 1536x776, Page Height: 3436
+Running terminal commands:
+- npm run dev (in c:\Users\divya\DataDrive\Study\IIIT_Pune\7th_Sem\Internship\BuildWiseAI\frontend, running for 1h13m18s)
+</ADDITIONAL_METADATA>

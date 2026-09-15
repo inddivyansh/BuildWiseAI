@@ -142,6 +142,10 @@ const AppShell: React.FC = () => {
             path="/how-it-works/demo"
             element={<DemoPage onNavigate={(r) => navigate(r)} />}
           />
+          <Route
+            path="/demo"
+            element={<DemoPage onNavigate={(r) => navigate(r)} />}
+          />
 
           {/* Screen 4: Projects Dashboard */}
           <Route

@@ -174,21 +174,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span>New Project</span>
             </button>
           ) : (
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => onNavigate('/how-it-works/demo')}
-                className="hidden sm:flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors px-3 py-1.5"
-              >
-                <span>Demo</span>
-              </button>
-              <button
-                onClick={() => onNavigate('/projects/new')}
-                className="flex items-center gap-2 px-5 py-2 rounded-full bg-white hover:bg-slate-100 text-black text-xs font-bold shadow-md transition-all active:scale-95 cursor-pointer"
-              >
-                <span>Analyze Blueprint</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
+            <button
+              onClick={() => onNavigate('/projects/new')}
+              className="flex items-center gap-2 px-5 py-2 rounded-full bg-white hover:bg-slate-100 text-black text-xs font-bold shadow-md transition-all active:scale-95 cursor-pointer"
+            >
+              <span>Analyze Blueprint</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
           )}
         </div>
       </div>

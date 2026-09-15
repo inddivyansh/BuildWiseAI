@@ -517,18 +517,20 @@ export const FloorPlanViewer: React.FC<FloorPlanViewerProps> = ({
             })}
         </svg>
 
-        {/* Interactive Room Overlay Badge (Screen 7) */}
-        <div className="absolute top-[42%] left-[48%] -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10 animate-in fade-in duration-300">
-          <div className="px-3.5 py-1.5 rounded-lg bg-[#0F1420]/95 backdrop-blur-md border border-emerald-500/40 text-white shadow-xl text-center">
-            <div className="text-xs font-bold text-white flex items-center justify-center gap-1.5">
-              <span>{selectedRoom ? selectedRoom.label || selectedRoom.room_type : 'Living Room'}</span>
-            </div>
-            <div className="text-[10px] text-slate-300 font-mono mt-0.5 flex items-center justify-center gap-1">
-              <span>Area: {selectedRoom?.area_m2 ? selectedRoom.area_m2.toFixed(1) : '24.5'} m²</span>
-              <span className="text-emerald-400 font-bold">· Compliant ✓</span>
+        {/* Interactive Room Overlay Badge */}
+        {selectedRoom && (
+          <div className="absolute top-[42%] left-[48%] -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10 animate-in fade-in duration-300">
+            <div className="px-3.5 py-1.5 rounded-lg bg-[#0F1420]/95 backdrop-blur-md border border-emerald-500/40 text-white shadow-xl text-center">
+              <div className="text-xs font-bold text-white flex items-center justify-center gap-1.5">
+                <span>{selectedRoom.label || selectedRoom.room_type}</span>
+              </div>
+              <div className="text-[10px] text-slate-300 font-mono mt-0.5 flex items-center justify-center gap-1">
+                <span>Area: {selectedRoom.area_m2 ? selectedRoom.area_m2.toFixed(1) : '—'} m²</span>
+                <span className="text-emerald-400 font-bold">· Compliant ✓</span>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Legend Overlay at Bottom Left */}
         <div className="absolute bottom-3 left-3 glass-panel px-3 py-2 text-[11px] flex items-center gap-3 text-slate-300">
