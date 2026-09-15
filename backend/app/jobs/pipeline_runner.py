@@ -145,24 +145,30 @@ class PipelineRunner:
                         room.compute_area()
 
             # ── Stage 4: Build Connectivity Graph ──────────
-            await self._update("processing", "building_graph", 50, "Building room connectivity graph...")
+            await self._update("processing", "building_graph", 45, "Building room connectivity graph...")
             from engines.graph.builder import FloorPlanGraphBuilder
             graph_builder = FloorPlanGraphBuilder()
             floor_graph = graph_builder.build(cgm)
             graph_dict = floor_graph.to_dict()
 
-            # ── Stage 5: Evaluate Compliance Rules ─────────
-            await self._update("processing", "compliance", 70, "Evaluating National Building Code regulations...")
+            # ── Stage 5: Extract Verified Measurements ─────
+            await self._update("processing", "measuring", 60, "Computing verified geometric measurements & egress paths...")
+            from engines.measurements.extractor import GeometricMeasurementExtractor
+            measurements = GeometricMeasurementExtractor.extract_all(cgm, floor_graph)
+            logger.info("Geometric measurements computed", count=len(measurements))
+
+            # ── Stage 6: Evaluate Compliance Rules ─────────
+            await self._update("processing", "compliance", 75, "Evaluating National Building Code regulations...")
             compliance_engine = ComplianceEngine()
             compliance_output = compliance_engine.evaluate(cgm=cgm, graph=floor_graph, context=config)
 
-            # ── Stage 6: AI-Assisted Explanations ──────────
+            # ── Stage 7: AI-Assisted Explanations ──────────
             await self._update("processing", "explaining", 85, "Generating AI regulatory explanations...")
             await self._generate_ai_explanations(compliance_output, config)
 
-            # ── Stage 7: Persist Results to DB ─────────────
+            # ── Stage 8: Persist Results to DB ─────────────
             await self._update("processing", "persisting", 95, "Saving analysis snapshot and report...")
-            await self._persist_results(cgm, graph_dict, compliance_output)
+            await self._persist_results(cgm, graph_dict, compliance_output, measurements, config)
 
             # ── Complete ───────────────────────────────────
             await self._update("complete", "complete", 100, "Analysis complete")
@@ -284,9 +290,13 @@ class PipelineRunner:
         cgm: Any,
         graph_dict: dict,
         compliance_output: ComplianceEvaluationOutput,
+        measurements: Optional[list] = None,
+        config: Optional[dict] = None,
     ) -> None:
         """Persist snapshot, compliance results, violations, and report to DB."""
         await self._ensure_rules_seeded()
+
+        occupancy = (config or {}).get("occupancy_type", "Business/Office")
 
         # Delete existing snapshot and results if re-running
         existing_snap = await self.db.execute(
@@ -302,10 +312,11 @@ class PipelineRunner:
         for old_r in existing_results.scalars().all():
             await self.db.delete(old_r)
 
-        # Build floor_data: CGM + graph + compliance summary
+        # Build floor_data: CGM + graph + compliance summary + real measurements
         floor_data = cgm.to_storage_dict()
         floor_data["graph"] = graph_dict
         floor_data["compliance_summary"] = compliance_output.summary.to_dict()
+        floor_data["measurements"] = [m.to_dict() for m in measurements] if measurements else []
 
         snapshot = FloorPlanSnapshot(
             analysis_run_id=self.run_id,
@@ -321,8 +332,10 @@ class PipelineRunner:
             metadata_={
                 "source_format": cgm.metadata.source_format,
                 "source_filename": cgm.metadata.source_filename,
+                "occupancy_type": occupancy,
                 "warnings": cgm.metadata.extraction_warnings,
                 "graph_stats": graph_dict.get("stats", {}),
+                "measurement_count": len(measurements) if measurements else 0,
             },
         )
         self.db.add(snapshot)
@@ -371,16 +384,23 @@ class PipelineRunner:
         report_data = {
             "analysis_run_id": self.run_id_str,
             "generated_at": datetime.now(UTC).isoformat(),
+            "occupancy_type": occupancy,
             "disclaimer": (
                 "BuildWise AI provides automated preliminary compliance screening and does not "
                 "replace review by a qualified architect, engineer, or competent authority."
             ),
             "summary": compliance_output.summary.to_dict(),
             "compliance_results": [r.to_dict() for r in compliance_output.results],
+            "measurements": [m.to_dict() for m in measurements] if measurements else [],
+            "insufficient_data": [
+                r.to_dict() for r in compliance_output.results
+                if r.status == ResultStatus.INSUFFICIENT_DATA
+            ],
             "building_metadata": {
                 "total_area_m2": cgm.total_area_m2,
                 "floor_count": cgm.floor_count,
                 "source_file": cgm.metadata.source_filename,
+                "occupancy": occupancy,
             },
         }
         report_json_str = json.dumps(report_data, indent=2)

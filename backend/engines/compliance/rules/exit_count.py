@@ -78,6 +78,15 @@ class MinExitCountRule(ComplianceRule):
                     )
                 )
 
+            from engines.compliance.recommendations import RecommendationEngine
+            rec = RecommendationEngine.generate(
+                rule_id=self.rule_id,
+                status=status.value if hasattr(status, "value") else status,
+                measured_value=float(exit_count),
+                required_value=float(required_exits),
+                unit="count",
+            )
+
             results.append(
                 ComplianceResultData(
                     rule_id=self.rule_id,
@@ -94,12 +103,7 @@ class MinExitCountRule(ComplianceRule):
                     regulation_source=f"{self.regulation_source} {self.part} {self.section}",
                     confidence=confidence.value,
                     floor_level=floor.level,
-                    recommendation=(
-                        "Add a second independent exit staircase/doorway placed remotely from "
-                        "the existing exit to ensure dual egress paths."
-                        if status in (ResultStatus.FAIL, ResultStatus.UNVERIFIED)
-                        else "Floor satisfies minimum exit count requirements."
-                    ),
+                    recommendation=rec,
                     evidence={
                         "floor_level": floor.level,
                         "floor_area_m2": round(floor_area, 2),

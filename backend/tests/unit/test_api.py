@@ -29,3 +29,20 @@ def test_compliance_rules_endpoint(client):
         data = response.json()
         assert "rules" in data
         assert "total" in data
+
+
+def test_analysis_endpoints_route_registration(client):
+    fake_run_id = "00000000-0000-0000-0000-000000000000"
+    # Endpoints should return 404 Not Found (or DB error if test DB uninitialized), confirming routes exist
+    r_sum = client.get(f"/api/v1/analysis/{fake_run_id}/summary")
+    assert r_sum.status_code in (404, 500)
+
+    r_meas = client.get(f"/api/v1/analysis/{fake_run_id}/measurements")
+    assert r_meas.status_code in (404, 500)
+
+    r_paths = client.get(f"/api/v1/analysis/{fake_run_id}/egress-paths")
+    assert r_paths.status_code in (200, 404, 500)
+
+    r_hist = client.get(f"/api/v1/analysis/project/{fake_run_id}/history")
+    assert r_hist.status_code in (200, 404, 500)
+

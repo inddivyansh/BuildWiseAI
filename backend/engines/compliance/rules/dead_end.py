@@ -75,13 +75,17 @@ class MaxDeadEndCorridorRule(ComplianceRule):
                 corridor_length = max(edge_lengths) if edge_lengths else 0.0
 
                 # Check if corridor is a dead-end:
-                # If connected to only 1 egress passage or if degree in graph is 1
+                # If connected to only 1 egress passage or if degree in graph is <= 1
                 is_dead_end = False
-                if graph and hasattr(graph, "nx_graph") and graph.nx_graph is not None:
+                if graph and hasattr(graph, "edges"):
+                    node_id = str(room.id)
+                    connected_edges = [e for e in graph.edges if e.source_id == node_id or e.target_id == node_id]
+                    if len(connected_edges) <= 1:
+                        is_dead_end = True
+                elif graph and hasattr(graph, "nx_graph") and graph.nx_graph is not None:
                     node_id = str(room.id)
                     if node_id in graph.nx_graph:
-                        degree = graph.nx_graph.degree(node_id)
-                        if degree <= 1:
+                        if graph.nx_graph.degree(node_id) <= 1:
                             is_dead_end = True
 
                 if is_dead_end:
@@ -105,6 +109,15 @@ class MaxDeadEndCorridorRule(ComplianceRule):
                             )
                         )
 
+                    from engines.compliance.recommendations import RecommendationEngine
+                    rec = RecommendationEngine.generate(
+                        rule_id=self.rule_id,
+                        status=status.value if hasattr(status, "value") else status,
+                        measured_value=corridor_length,
+                        required_value=max_allowed,
+                        unit="m",
+                    )
+
                     results.append(
                         ComplianceResultData(
                             rule_id=self.rule_id,
@@ -121,15 +134,11 @@ class MaxDeadEndCorridorRule(ComplianceRule):
                             regulation_source=f"{self.regulation_source} {self.part}",
                             confidence=room.confidence.value,
                             floor_level=floor.level,
-                            recommendation=(
-                                "Provide a second distinct path of egress or reduce dead-end length "
-                                f"to under {max_allowed:.1f} m to eliminate entrapment hazard."
-                                if status in (ResultStatus.FAIL, ResultStatus.UNVERIFIED)
-                                else "Dead-end length complies with regulations."
-                            ),
+                            recommendation=rec,
                             evidence={
                                 "room_id": str(room.id),
                                 "corridor_length_m": round(corridor_length, 2),
+                                "max_allowed_m": max_allowed,
                                 "is_dead_end": True,
                             },
                             violations=violations,
@@ -145,6 +154,23 @@ class MaxDeadEndCorridorRule(ComplianceRule):
                         title="Dead-End Corridor Check",
                         description="No corridors identified for dead-end egress evaluation.",
                         confidence=ConfidenceLevel.HIGH.value,
+                    )
+                )
+            elif len(results) == 0:
+                results.append(
+                    ComplianceResultData(
+                        rule_id=self.rule_id,
+                        status=ResultStatus.PASS,
+                        severity=Severity.ADVISORY,
+                        title="Dead-End Corridor Check",
+                        description="No dead-end corridors detected; all circulation routes provide through-egress connectivity.",
+                        measured_value=0.0,
+                        required_value=max_allowed,
+                        unit="m",
+                        regulation_source=f"{self.regulation_source} {self.part}",
+                        confidence=ConfidenceLevel.HIGH.value,
+                        floor_level=floor.level,
+                        recommendation="Corridor layout complies with NBC continuous egress requirements.",
                     )
                 )
 

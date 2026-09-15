@@ -17,6 +17,7 @@ import { TopologicalGraphViewer } from './components/TopologicalGraphViewer'
 import { RegulatoryChat } from './components/RegulatoryChat'
 import { ReportViewer } from './components/ReportViewer'
 import { UploadModal } from './components/UploadModal'
+import { AnalysisHistoryModal, AnalysisHistoryRecord } from './components/AnalysisHistoryModal'
 import { apiClient } from './api/client'
 import type { CanonicalFloorPlan, CGMRoom } from './types/geometry'
 import type { ComplianceResult, ComplianceSummary, Violation } from './types/compliance'
@@ -328,6 +329,9 @@ const DEMO_COMPLIANCE_RESULTS: ComplianceResult[] = [
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'studio' | 'compliance' | 'graph' | 'chat' | 'reports'>('studio')
   const [isUploadOpen, setIsUploadOpen] = useState<boolean>(false)
+  const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false)
+  const [analysisHistory, setAnalysisHistory] = useState<AnalysisHistoryRecord[]>([])
+  const [currentOccupancy, setCurrentOccupancy] = useState<string>('Business / Office')
 
   // Data state
   const [projects, setProjects] = useState<Project[]>([])
@@ -370,6 +374,44 @@ export const App: React.FC = () => {
     storage: 'ok',
     llm_status: 'available',
   })
+
+  const loadRunData = async (runId: string) => {
+    try {
+      setCurrentRunId(runId)
+      const fp = await apiClient.getFloorPlan(runId)
+      const viols = await apiClient.getViolations(runId)
+      const comp = await apiClient.getComplianceResults(runId)
+      const graph = await apiClient.getGraph(runId)
+
+      setFloorPlan(fp)
+      setViolations(viols.violations)
+      setComplianceResults(comp.results)
+      setComplianceSummary(comp.summary)
+      setGraphData(graph)
+      if (viols.violations.length > 0) {
+        setSelectedViolation(viols.violations[0])
+      }
+    } catch (err) {
+      console.error('Failed to load run snapshot', err)
+    }
+  }
+
+  // Load initial projects & history
+  useEffect(() => {
+    const initData = async () => {
+      try {
+        const projData = await apiClient.listProjects()
+        setProjects(projData.items)
+        if (projData.items.length > 0) {
+          const hist = await apiClient.getProjectHistory(projData.items[0].id)
+          setAnalysisHistory(hist.runs)
+        }
+      } catch {
+        // Fallback demo values
+      }
+    }
+    initData()
+  }, [])
 
   // Polling for live system health
   useEffect(() => {
@@ -419,19 +461,16 @@ export const App: React.FC = () => {
           clearInterval(pollInterval)
           setTimeout(() => setAnalysisProgress(null), 3000)
 
-          // Fetch real backend data
-          const fp = await apiClient.getFloorPlan(runId)
-          const viols = await apiClient.getViolations(runId)
-          const comp = await apiClient.getComplianceResults(runId)
-          const graph = await apiClient.getGraph(runId)
+          await loadRunData(runId)
 
-          setFloorPlan(fp)
-          setViolations(viols.violations)
-          setComplianceResults(comp.results)
-          setComplianceSummary(comp.summary)
-          setGraphData(graph)
-          if (viols.violations.length > 0) {
-            setSelectedViolation(viols.violations[0])
+          // Refresh history if project exists
+          if (projects.length > 0) {
+            try {
+              const hist = await apiClient.getProjectHistory(projects[0].id)
+              setAnalysisHistory(hist.runs)
+            } catch {
+              // Ignore
+            }
           }
         } else if (st.status === 'failed') {
           clearInterval(pollInterval)
@@ -449,6 +488,7 @@ export const App: React.FC = () => {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         onOpenUpload={() => setIsUploadOpen(true)}
+        onOpenHistory={() => setIsHistoryOpen(true)}
         readiness={readiness}
       />
 
@@ -540,6 +580,13 @@ export const App: React.FC = () => {
             runId={currentRunId}
             summary={complianceSummary}
             results={complianceResults}
+            buildingMetadata={{
+              total_area_m2: floorPlan?.total_area_m2,
+              floor_count: floorPlan?.floor_count,
+              source_file: floorPlan?.metadata?.source_filename,
+              occupancy: currentOccupancy,
+            }}
+            floorPlan={floorPlan}
           />
         )}
       </main>
@@ -550,6 +597,15 @@ export const App: React.FC = () => {
         onClose={() => setIsUploadOpen(false)}
         projects={projects}
         onAnalysisStarted={handleAnalysisStarted}
+      />
+
+      {/* Analysis History Modal */}
+      <AnalysisHistoryModal
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+        history={analysisHistory}
+        currentRunId={currentRunId}
+        onSelectRun={loadRunData}
       />
     </div>
   )

@@ -96,6 +96,15 @@ class MinVentilationRatioRule(ComplianceRule):
                         )
                     )
 
+                from engines.compliance.recommendations import RecommendationEngine
+                rec = RecommendationEngine.generate(
+                    rule_id=self.rule_id,
+                    status=status.value if hasattr(status, "value") else status,
+                    measured_value=actual_ratio,
+                    required_value=self.DEFAULT_MIN_RATIO,
+                    unit="ratio",
+                )
+
                 results.append(
                     ComplianceResultData(
                         rule_id=self.rule_id,
@@ -112,12 +121,7 @@ class MinVentilationRatioRule(ComplianceRule):
                         regulation_source=f"{self.regulation_source} {self.part} {self.section}",
                         confidence=room.confidence.value,
                         floor_level=floor.level,
-                        recommendation=(
-                            "Add or enlarge external window openings to provide at least "
-                            f"{room_area * self.DEFAULT_MIN_RATIO:.2f} m² of aggregate glazing area."
-                            if status in (ResultStatus.FAIL, ResultStatus.UNVERIFIED)
-                            else "Window-to-floor ventilation ratio is compliant."
-                        ),
+                        recommendation=rec,
                         evidence={
                             "room_id": str(room.id),
                             "room_area_m2": round(room_area, 2),

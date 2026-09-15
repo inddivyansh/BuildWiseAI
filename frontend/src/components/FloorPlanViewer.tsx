@@ -390,6 +390,71 @@ export const FloorPlanViewer: React.FC<FloorPlanViewerProps> = ({
               const isCrit = viol.severity === 'CRITICAL'
               const color = isCrit ? '#f43f5e' : viol.severity === 'MAJOR' ? '#f97316' : '#eab308'
 
+              // 1. Polyline geometry (e.g. travel distance routes, dead ends)
+              const polylineCoords =
+                viol.geometry_hint === 'polyline' || viol.coordinates?.polyline
+                  ? (viol.coordinates?.polyline || (Array.isArray(viol.coordinates) ? viol.coordinates : null))
+                  : null
+
+              if (polylineCoords && Array.isArray(polylineCoords) && polylineCoords.length >= 2) {
+                const pointsStr = polylineCoords.map((pt: any) => `${pt[0]},${pt[1]}`).join(' ')
+                const startPt = polylineCoords[0]
+                const endPt = polylineCoords[polylineCoords.length - 1]
+
+                return (
+                  <g
+                    key={viol.id}
+                    className="cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onSelectViolation && onSelectViolation(viol)
+                    }}
+                  >
+                    <polyline
+                      points={pointsStr}
+                      fill="none"
+                      stroke={color}
+                      strokeWidth={isSelected ? '0.14' : '0.08'}
+                      strokeDasharray={isSelected ? '0.2 0.1' : '0.3 0.15'}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      opacity={isSelected ? 1.0 : 0.85}
+                    />
+                    {/* Origin marker */}
+                    <circle
+                      cx={startPt[0]}
+                      cy={startPt[1]}
+                      r={isSelected ? 0.35 : 0.25}
+                      fill={color}
+                      stroke="#ffffff"
+                      strokeWidth="0.04"
+                    />
+                    {/* Destination Exit marker */}
+                    <circle
+                      cx={endPt[0]}
+                      cy={endPt[1]}
+                      r={isSelected ? 0.45 : 0.35}
+                      fill="#10b981"
+                      stroke="#ffffff"
+                      strokeWidth="0.05"
+                    />
+                    {isSelected && (
+                      <text
+                        x={(startPt[0] + endPt[0]) / 2}
+                        y={(startPt[1] + endPt[1]) / 2 - 0.25}
+                        fill={color}
+                        fontSize="0.26"
+                        fontWeight="700"
+                        textAnchor="middle"
+                      >
+                        {viol.measured_value ? `${viol.measured_value.toFixed(1)}m` : 'Path'}
+                      </text>
+                    )}
+                  </g>
+                )
+              }
+
+              // 2. Polygon geometry (e.g. non-compliant rooms, corridors)
               if (viol.geometry_hint === 'polygon' && Array.isArray(viol.coordinates)) {
                 const pointsStr = (viol.coordinates as number[][])
                   .map((pt) => `${pt[0]},${pt[1]}`)
@@ -399,8 +464,10 @@ export const FloorPlanViewer: React.FC<FloorPlanViewerProps> = ({
                     key={viol.id}
                     points={pointsStr}
                     fill={color}
+                    fillOpacity={isSelected ? 0.45 : 0.25}
                     stroke={color}
-                    strokeWidth={isSelected ? '0.1' : '0.05'}
+                    strokeWidth={isSelected ? '0.12' : '0.05'}
+                    strokeDasharray={isSelected ? '0.15 0.08' : 'none'}
                     className="violation-highlight cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation()
@@ -410,23 +477,39 @@ export const FloorPlanViewer: React.FC<FloorPlanViewerProps> = ({
                 )
               }
 
+              // 3. Point marker (e.g. doors, openings, stairs)
               if (viol.label_position) {
                 return (
-                  <circle
+                  <g
                     key={viol.id}
-                    cx={viol.label_position.x}
-                    cy={viol.label_position.y}
-                    r="0.35"
-                    fill={color}
-                    fillOpacity="0.8"
-                    stroke="#ffffff"
-                    strokeWidth="0.04"
                     className="cursor-pointer violation-highlight"
                     onClick={(e) => {
                       e.stopPropagation()
                       onSelectViolation && onSelectViolation(viol)
                     }}
-                  />
+                  >
+                    {isSelected && (
+                      <circle
+                        cx={viol.label_position.x}
+                        cy={viol.label_position.y}
+                        r="0.65"
+                        fill="none"
+                        stroke={color}
+                        strokeWidth="0.04"
+                        strokeDasharray="0.1 0.05"
+                        opacity="0.8"
+                      />
+                    )}
+                    <circle
+                      cx={viol.label_position.x}
+                      cy={viol.label_position.y}
+                      r={isSelected ? 0.45 : 0.35}
+                      fill={color}
+                      fillOpacity="0.85"
+                      stroke="#ffffff"
+                      strokeWidth="0.04"
+                    />
+                  </g>
                 )
               }
 

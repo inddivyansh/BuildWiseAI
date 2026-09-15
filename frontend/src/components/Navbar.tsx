@@ -9,12 +9,14 @@ import {
   CheckCircle2,
   AlertCircle,
   Cpu,
+  History,
 } from 'lucide-react'
 
 interface NavbarProps {
   activeTab: 'studio' | 'compliance' | 'graph' | 'chat' | 'reports'
   onTabChange: (tab: 'studio' | 'compliance' | 'graph' | 'chat' | 'reports') => void
   onOpenUpload: () => void
+  onOpenHistory?: () => void
   readiness?: {
     database: string
     storage: string
@@ -26,6 +28,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   activeTab,
   onTabChange,
   onOpenUpload,
+  onOpenHistory,
   readiness,
 }) => {
   const isDbOk = readiness?.database === 'ok'
@@ -141,6 +144,17 @@ export const Navbar: React.FC<NavbarProps> = ({
             </span>
           </div>
         </div>
+
+        {onOpenHistory && (
+          <button
+            onClick={onOpenHistory}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-300 bg-slate-900/80 hover:bg-slate-800 border border-slate-700/80 hover:text-white transition-all"
+            title="View Project Analysis History"
+          >
+            <History className="w-4 h-4 text-indigo-400" />
+            <span>History</span>
+          </button>
+        )}
 
         <button
           onClick={onOpenUpload}

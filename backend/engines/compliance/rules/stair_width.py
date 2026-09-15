@@ -81,6 +81,15 @@ class MinStairWidthRule(ComplianceRule):
                         )
                     )
 
+                from engines.compliance.recommendations import RecommendationEngine
+                rec = RecommendationEngine.generate(
+                    rule_id=self.rule_id,
+                    status=status.value if hasattr(status, "value") else status,
+                    measured_value=measured_width,
+                    required_value=required_width,
+                    unit="m",
+                )
+
                 results.append(
                     ComplianceResultData(
                         rule_id=self.rule_id,
@@ -97,12 +106,7 @@ class MinStairWidthRule(ComplianceRule):
                         regulation_source=f"{self.regulation_source} {self.part}",
                         confidence=stair.confidence.value,
                         floor_level=floor.level,
-                        recommendation=(
-                            f"Increase stair flight clear width to at least {required_width:.2f} m "
-                            "to meet emergency egress capacity standards."
-                            if status in (ResultStatus.FAIL, ResultStatus.UNVERIFIED)
-                            else "Staircase width complies with NBC fire safety standards."
-                        ),
+                        recommendation=rec,
                         evidence={
                             "stair_id": str(stair.id),
                             "measured_width_m": round(measured_width, 3),

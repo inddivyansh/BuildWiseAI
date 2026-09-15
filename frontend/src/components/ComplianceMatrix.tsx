@@ -42,93 +42,181 @@ export const ComplianceMatrix: React.FC<ComplianceMatrixProps> = ({
     return matchesStatus && matchesSearch
   })
 
-  const score = summary?.compliance_score_pct ?? 100
+  // Determine overall status
+  const hasFail = results.some((r) => r.status === 'FAIL')
+  const hasInsufficient = results.some((r) => r.status === 'INSUFFICIENT_DATA')
+  const hasUnverified = results.some((r) => r.status === 'UNVERIFIED')
+  const overallStatus = hasFail
+    ? 'FAIL'
+    : hasInsufficient
+    ? 'INSUFFICIENT DATA'
+    : hasUnverified
+    ? 'UNVERIFIED'
+    : 'PASS'
+
+  // Categorize results
+  const lifeSafetyIds = [
+    'NBC-2016-C4-TRAVEL-DIST',
+    'NBC-2016-C4-DEAD-END',
+    'NBC-2016-C4-CORRIDOR-WIDTH',
+    'NBC-2016-C4-DOOR-WIDTH',
+    'NBC-2016-C4-EXIT-COUNT',
+    'NBC-2016-C4-STAIR-WIDTH',
+  ]
+  const habitableIds = ['NBC-2016-C3-ROOM-AREA', 'NBC-2016-C3-ROOM-HEIGHT']
+  const environmentalIds = ['NBC-2016-C8-VENTILATION-RATIO', 'NBC-2016-C8-WINDOW-AREA']
+
+  const lifeSafetyResults = results.filter(
+    (r) => lifeSafetyIds.includes(r.rule_id) || r.title.toLowerCase().includes('exit') || r.title.toLowerCase().includes('corridor') || r.title.toLowerCase().includes('travel')
+  )
+  const habitableResults = results.filter(
+    (r) => habitableIds.includes(r.rule_id) || r.title.toLowerCase().includes('room')
+  )
+  const environmentalResults = results.filter(
+    (r) => environmentalIds.includes(r.rule_id) || r.title.toLowerCase().includes('ventilation') || r.title.toLowerCase().includes('window')
+  )
+
+  const getCategoryStatus = (catResults: ComplianceResult[]) => {
+    if (catResults.length === 0) return { label: 'NO DATA', color: 'text-slate-400' }
+    if (catResults.some((r) => r.status === 'FAIL')) return { label: 'FAIL', color: 'text-rose-400' }
+    if (catResults.some((r) => r.status === 'INSUFFICIENT_DATA')) return { label: 'INSUFFICIENT DATA', color: 'text-amber-400' }
+    if (catResults.some((r) => r.status === 'UNVERIFIED')) return { label: 'UNVERIFIED', color: 'text-purple-400' }
+    return { label: 'PASS', color: 'text-emerald-400' }
+  }
+
+  const lifeStatus = getCategoryStatus(lifeSafetyResults)
+  const habStatus = getCategoryStatus(habitableResults)
+  const envStatus = getCategoryStatus(environmentalResults)
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-6">
       {/* Top Scorecard & Statistics Header */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {/* Compliance Score Card */}
-        <div className="glass-panel p-5 flex items-center justify-between border-l-4 border-l-indigo-500">
+        {/* Overall Status Card */}
+        <div
+          className={`glass-panel p-5 flex items-center justify-between border-l-4 ${
+            overallStatus === 'FAIL'
+              ? 'border-l-rose-500'
+              : overallStatus === 'PASS'
+              ? 'border-l-emerald-500'
+              : overallStatus === 'INSUFFICIENT DATA'
+              ? 'border-l-amber-500'
+              : 'border-l-purple-500'
+          }`}
+        >
           <div>
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Compliance Score
+              Overall Status
             </span>
             <div className="flex items-baseline gap-2 mt-1">
-              <span className="font-display font-extrabold text-3xl text-white">
-                {score.toFixed(1)}%
-              </span>
               <span
-                className={`text-xs font-semibold ${
-                  score >= 80 ? 'text-emerald-400' : score >= 60 ? 'text-amber-400' : 'text-rose-400'
+                className={`font-display font-extrabold text-2xl ${
+                  overallStatus === 'FAIL'
+                    ? 'text-rose-400'
+                    : overallStatus === 'PASS'
+                    ? 'text-emerald-400'
+                    : overallStatus === 'INSUFFICIENT DATA'
+                    ? 'text-amber-400'
+                    : 'text-purple-400'
                 }`}
               >
-                {score >= 80 ? 'Good Standing' : 'Action Required'}
+                {overallStatus}
               </span>
             </div>
             <span className="text-[11px] text-slate-400 mt-1 block">
-              {summary?.passed ?? 0} of {summary?.total_checks ?? results.length} checks satisfied
+              {overallStatus === 'FAIL'
+                ? 'Mandatory non-compliances detected'
+                : overallStatus === 'PASS'
+                ? 'All evaluated rules satisfied'
+                : 'Pending additional geometry or data'}
             </span>
           </div>
 
-          <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center">
-            <ShieldCheck className="w-7 h-7 text-indigo-400" />
+          <div
+            className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
+              overallStatus === 'FAIL'
+                ? 'bg-rose-500/10 border border-rose-500/30'
+                : overallStatus === 'PASS'
+                ? 'bg-emerald-500/10 border border-emerald-500/30'
+                : 'bg-amber-500/10 border border-amber-500/30'
+            }`}
+          >
+            {overallStatus === 'FAIL' ? (
+              <XCircle className="w-6 h-6 text-rose-400" />
+            ) : overallStatus === 'PASS' ? (
+              <CheckCircle2 className="w-6 h-6 text-emerald-400" />
+            ) : (
+              <AlertTriangle className="w-6 h-6 text-amber-400" />
+            )}
           </div>
         </div>
 
-        {/* Total Checks */}
+        {/* Life Safety Breakdown */}
         <div className="glass-panel p-5 flex items-center justify-between border-l-4 border-l-cyan-500">
           <div>
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Total Checks
+              Life Safety
             </span>
-            <div className="font-display font-extrabold text-3xl text-white mt-1">
-              {summary?.total_checks ?? results.length}
+            <div className={`font-display font-extrabold text-2xl mt-1 ${lifeStatus.color}`}>
+              {lifeStatus.label}
             </div>
             <span className="text-[11px] text-slate-400 mt-1 block">
-              NBC 2016 parametric audits
+              Exits · Travel · Dead-ends · Corridors
             </span>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
-            <Filter className="w-6 h-6 text-cyan-400" />
+          <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-mono font-bold text-sm">
+            {lifeSafetyResults.length}
           </div>
         </div>
 
-        {/* Flagged / Unverified */}
-        <div className="glass-panel p-5 flex items-center justify-between border-l-4 border-l-purple-500">
+        {/* Habitable & Planning Breakdown */}
+        <div className="glass-panel p-5 flex items-center justify-between border-l-4 border-l-indigo-500">
           <div>
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Flagged Deviations
+              Habitable / Planning
             </span>
-            <div className="font-display font-extrabold text-3xl text-purple-400 mt-1">
-              {(summary?.failed ?? 0) + (summary?.unverified ?? 0)}
+            <div className={`font-display font-extrabold text-2xl mt-1 ${habStatus.color}`}>
+              {habStatus.label}
             </div>
             <span className="text-[11px] text-slate-400 mt-1 block">
-              Awaiting verification / non-compliant
+              Room areas · Minimum dimensions
             </span>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center">
-            <AlertTriangle className="w-6 h-6 text-purple-400" />
+          <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-mono font-bold text-sm">
+            {habitableResults.length}
           </div>
         </div>
 
-        {/* Verified Pass */}
+        {/* Environmental Breakdown */}
         <div className="glass-panel p-5 flex items-center justify-between border-l-4 border-l-emerald-500">
           <div>
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Compliant Checks
+              Environmental
             </span>
-            <div className="font-display font-extrabold text-3xl text-emerald-400 mt-1">
-              {summary?.passed ?? 0}
+            <div className={`font-display font-extrabold text-2xl mt-1 ${envStatus.color}`}>
+              {envStatus.label}
             </div>
             <span className="text-[11px] text-slate-400 mt-1 block">
-              Satisfies code thresholds
+              Ventilation ratio · Window openings
             </span>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
-            <CheckCircle2 className="w-6 h-6 text-emerald-400" />
+          <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-mono font-bold text-sm">
+            {environmentalResults.length}
           </div>
         </div>
+      </div>
+
+      {/* Compliance Score Definition Banner */}
+      <div className="bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 flex items-center justify-between text-xs text-slate-400">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-indigo-400 shrink-0" />
+          <span>
+            <strong>Deterministic Screening:</strong> Compliance score evaluates verified NBC rules with measurable geometry. Rules with insufficient geometric data are preserved as <span className="text-amber-400 font-semibold">INSUFFICIENT_DATA</span> without false penalties.
+          </span>
+        </div>
+        <span className="text-slate-300 font-mono font-semibold ml-4">
+          Score: {summary?.compliance_score_pct ? `${summary.compliance_score_pct.toFixed(0)}%` : '—'}
+        </span>
       </div>
 
       {/* Filter and Search Bar */}

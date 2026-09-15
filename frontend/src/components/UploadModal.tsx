@@ -30,7 +30,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [projectId, setProjectId] = useState<string>(projects[0]?.id || '')
-  const [occupancyType, setOccupancyType] = useState<string>('commercial')
+  const [occupancyType, setOccupancyType] = useState<string>('Business/Office')
   const [isDetecting, setIsDetecting] = useState<boolean>(false)
   const [detection, setDetection] = useState<DocumentDetection | null>(null)
   const [isUploading, setIsUploading] = useState<boolean>(false)
@@ -235,10 +235,12 @@ export const UploadModal: React.FC<UploadModalProps> = ({
               onChange={(e) => setOccupancyType(e.target.value)}
               className="bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
             >
-              <option value="commercial">Commercial / Business (Office, Retail)</option>
-              <option value="residential">Residential (Group Housing, Apartments)</option>
-              <option value="assembly">Assembly / Public Gathering</option>
-              <option value="educational">Educational (Schools, Institutes)</option>
+              <option value="Business/Office">Business / Office (Offices, Banks, Professional)</option>
+              <option value="Residential">Residential (Dwellings, Apartments)</option>
+              <option value="Educational">Educational (Schools, Colleges, Training)</option>
+              <option value="Institutional">Institutional (Hospitals, Sanatoria, Custodial)</option>
+              <option value="Assembly">Assembly (Theatres, Halls, Terminals)</option>
+              <option value="Other">Other / Unclassified</option>
             </select>
           </div>
 

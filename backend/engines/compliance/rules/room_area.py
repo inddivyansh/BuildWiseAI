@@ -83,6 +83,15 @@ class MinRoomAreaRule(ComplianceRule):
                     )
 
                 type_name = room.room_type.value.replace("_", " ").title()
+                from engines.compliance.recommendations import RecommendationEngine
+                rec = RecommendationEngine.generate(
+                    rule_id=self.rule_id,
+                    status=status.value if hasattr(status, "value") else status,
+                    measured_value=measured_area,
+                    required_value=required_min,
+                    unit="m2",
+                )
+
                 results.append(
                     ComplianceResultData(
                         rule_id=self.rule_id,
@@ -99,12 +108,7 @@ class MinRoomAreaRule(ComplianceRule):
                         regulation_source=f"{self.regulation_source} {self.part} {self.clause}",
                         confidence=room.confidence.value,
                         floor_level=floor.level,
-                        recommendation=(
-                            f"Expand room '{room.label or type_name}' to at least {required_min:.1f} m² "
-                            "to meet minimum statutory habitable space standards."
-                            if status in (ResultStatus.FAIL, ResultStatus.UNVERIFIED)
-                            else f"{type_name} meets minimum area requirement."
-                        ),
+                        recommendation=rec,
                         evidence={
                             "room_id": str(room.id),
                             "room_type": room.room_type.value,

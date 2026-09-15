@@ -112,6 +112,15 @@ class MinCorridorWidthRule(ComplianceRule):
                         )
                     )
 
+                from engines.compliance.recommendations import RecommendationEngine
+                rec = RecommendationEngine.generate(
+                    rule_id=self.rule_id,
+                    status=status.value if hasattr(status, "value") else status,
+                    measured_value=measured_width,
+                    required_value=required_width,
+                    unit="m",
+                )
+
                 results.append(
                     ComplianceResultData(
                         rule_id=self.rule_id,
@@ -128,12 +137,7 @@ class MinCorridorWidthRule(ComplianceRule):
                         regulation_source=f"{self.regulation_source} {self.part}",
                         confidence=room.confidence.value,
                         floor_level=floor.level,
-                        recommendation=(
-                            f"Widen corridor '{room.label or 'unnamed'}' to at least {required_width:.2f} m "
-                            "to comply with emergency egress clear width requirements."
-                            if status in (ResultStatus.FAIL, ResultStatus.UNVERIFIED)
-                            else "Corridor meets width requirement."
-                        ),
+                        recommendation=rec,
                         evidence={
                             "room_id": str(room.id),
                             "room_label": room.label,

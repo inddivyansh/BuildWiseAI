@@ -24,13 +24,15 @@ export interface Violation {
   entity_type: 'room' | 'wall' | 'opening' | 'corridor' | 'stair' | 'floor'
   entity_id?: string
   geometry_hint: 'polygon' | 'line' | 'point' | 'polyline' | 'bbox'
-  coordinates: number[][] | number[][][]
+  coordinates: any
   label_text?: string
   label_position?: { x: number; y: number }
   floor_level: number
   measured_value?: number
   required_value?: number
+  difference?: number
   unit?: string
+  confidence?: string
   regulation_source?: string
   verification_status?: string
   source_filename?: string

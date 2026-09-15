@@ -123,6 +123,30 @@ export const apiClient = {
     return res.data
   },
 
+  // Measurements and Egress Routes (Phase 4)
+  getMeasurements: async (runId: string) => {
+    const res = await api.get<{ run_id: string; total: number; measurements: any[] }>(
+      `/api/v1/analysis/${runId}/measurements`
+    )
+    return res.data
+  },
+  getEgressPaths: async (runId: string) => {
+    const res = await api.get<{ run_id: string; total_paths: number; paths: any[] }>(
+      `/api/v1/analysis/${runId}/egress-paths`
+    )
+    return res.data
+  },
+  getAnalysisSummary: async (runId: string) => {
+    const res = await api.get<any>(`/api/v1/analysis/${runId}/summary`)
+    return res.data
+  },
+  getProjectHistory: async (projectId: string) => {
+    const res = await api.get<{ project_id: string; total_runs: number; runs: any[] }>(
+      `/api/v1/analysis/project/${projectId}/history`
+    )
+    return res.data
+  },
+
   // Reports
   downloadReportJsonUrl: (runId: string) => `${API_BASE}/api/v1/reports/${runId}/json`,
   downloadReportPdfUrl: (runId: string) => `${API_BASE}/api/v1/reports/${runId}/pdf`,
