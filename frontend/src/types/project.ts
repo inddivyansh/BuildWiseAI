@@ -6,8 +6,8 @@ export interface Project {
   id: string
   name: string
   description?: string
-  building_type: string
-  occupancy_type: string
+  building_type?: string
+  occupancy_type?: string
   created_at: string
   updated_at: string
 }
@@ -26,11 +26,14 @@ export interface DocumentDetection {
 export interface UploadedDocument {
   id: string
   project_id: string
-  filename: string
+  original_name?: string
+  filename?: string
+  file_format?: string
   file_size_bytes: number
-  mime_type: string
+  mime_type?: string
   storage_key: string
-  created_at: string
+  uploaded_at?: string
+  created_at?: string
   detection_info?: DocumentDetection
 }
 

@@ -57,6 +57,9 @@ backend/scratch/
 *.pdf
 !data/regulations/*.pdf
 !tests/fixtures/**/*.pdf
+/*.png
+/*.jpg
+/*.jpeg
 
 # ─── Database ─────────────────────────────────────────────
 *.sqlite

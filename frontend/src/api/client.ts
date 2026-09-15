@@ -38,12 +38,19 @@ export const apiClient = {
     const res = await api.get<{ items: Project[]; total: number }>('/api/v1/projects/')
     return res.data
   },
-  createProject: async (data: { name: string; description?: string; building_type: string; occupancy_type: string }) => {
+  createProject: async (data: { name: string; description?: string; building_type?: string; occupancy_type?: string }) => {
     const res = await api.post<Project>('/api/v1/projects/', data)
     return res.data
   },
+  deleteProject: async (projectId: string) => {
+    await api.delete(`/api/v1/projects/${projectId}`)
+  },
 
   // Documents
+  listProjectDocuments: async (projectId: string) => {
+    const res = await api.get<{ items: UploadedDocument[]; total: number }>(`/api/v1/documents/project/${projectId}`)
+    return res.data
+  },
   detectDocument: async (file: File) => {
     const formData = new FormData()
     formData.append('file', file)
