@@ -110,44 +110,90 @@ export const HowItWorksPage: React.FC<HowItWorksPageProps> = ({ onNavigate }) =>
             </div>
           </div>
 
-          {/* Right Column: Visual Workflow Cards Stack */}
-          <div className="lg:col-span-6 space-y-4">
-            {/* Card 1: Blueprint Ingestion Graphic */}
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 shadow-sm flex items-center justify-center min-h-[140px]">
-              <svg viewBox="0 0 280 100" className="w-full max-w-[260px]" fill="none">
-                <rect x="10" y="10" width="260" height="80" rx="4" stroke="#94a3b8" strokeWidth="1.2" strokeDasharray="3 3" />
-                <rect x="25" y="25" width="90" height="50" fill="#e2e8f0" stroke="#64748b" strokeWidth="1" />
-                <rect x="130" y="25" width="125" height="50" fill="#e2e8f0" stroke="#64748b" strokeWidth="1" />
-                <line x1="115" y1="50" x2="130" y2="50" stroke="#6366f1" strokeWidth="2" />
-                <circle cx="115" cy="50" r="3" fill="#6366f1" />
+          {/* Right Column: Visual Workflow Cards Stack (Mockup Screen 2) */}
+          <div className="lg:col-span-6 space-y-5">
+            {/* Card 1: Crisp Architectural Blueprint CAD Preview */}
+            <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden relative">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100 mb-3 text-[11px] text-slate-400 font-mono">
+                <span>RIVERSIDE_LVL01_ARCH.DWG</span>
+                <span>1:100 SCALE</span>
+              </div>
+              <svg viewBox="0 0 400 180" className="w-full h-auto bg-slate-50 rounded-lg p-2" fill="none" stroke="currentColor">
+                {/* Background Grid */}
+                <pattern id="cad-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                  <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e2e8f0" strokeWidth="0.5" />
+                </pattern>
+                <rect width="400" height="180" fill="url(#cad-grid)" />
+
+                {/* Building Outer Walls */}
+                <rect x="30" y="20" width="340" height="140" stroke="#1e293b" strokeWidth="2.5" fill="#f8fafc" />
+
+                {/* Interior Partitions */}
+                <line x1="160" y1="20" x2="160" y2="160" stroke="#334155" strokeWidth="1.8" />
+                <line x1="260" y1="20" x2="260" y2="160" stroke="#334155" strokeWidth="1.8" />
+                <line x1="30" y1="95" x2="160" y2="95" stroke="#334155" strokeWidth="1.8" />
+                <line x1="260" y1="95" x2="370" y2="95" stroke="#334155" strokeWidth="1.8" />
+
+                {/* Door Opening Arcs */}
+                <path d="M 160 60 A 25 25 0 0 1 185 85" stroke="#64748b" strokeWidth="1.2" strokeDasharray="2 2" />
+                <line x1="160" y1="60" x2="160" y2="85" stroke="#1e293b" strokeWidth="1.8" />
+
+                <path d="M 260 130 A 25 25 0 0 0 235 155" stroke="#64748b" strokeWidth="1.2" strokeDasharray="2 2" />
+                <line x1="260" y1="130" x2="260" y2="155" stroke="#1e293b" strokeWidth="1.8" />
+
+                {/* Dimension Lines */}
+                <line x1="30" y1="12" x2="370" y2="12" stroke="#94a3b8" strokeWidth="0.8" markerStart="url(#arrow)" markerEnd="url(#arrow)" />
+                <text x="200" y="10" fill="#64748b" fontSize="8" fontFamily="monospace" textAnchor="middle">18.40 m</text>
+
+                <line x1="18" y1="20" x2="18" y2="160" stroke="#94a3b8" strokeWidth="0.8" />
+                <text x="14" y="95" fill="#64748b" fontSize="8" fontFamily="monospace" textAnchor="middle" transform="rotate(-90 14 95)">8.20 m</text>
+
+                {/* Room Labels */}
+                <text x="95" y="60" fill="#64748b" fontSize="9" fontWeight="600" textAnchor="middle">BEDROOM 01</text>
+                <text x="95" y="130" fill="#64748b" fontSize="9" fontWeight="600" textAnchor="middle">BEDROOM 02</text>
+                <text x="210" y="92" fill="#64748b" fontSize="9" fontWeight="600" textAnchor="middle">CORRIDOR</text>
+                <text x="315" y="60" fill="#64748b" fontSize="9" fontWeight="600" textAnchor="middle">LIVING ROOM</text>
+                <text x="315" y="130" fill="#64748b" fontSize="9" fontWeight="600" textAnchor="middle">KITCHEN</text>
               </svg>
             </div>
 
-            {/* Card 2: Floor Plan with Violation Tag */}
-            <div className="relative p-4 rounded-xl bg-slate-900 border border-slate-800 shadow-sm min-h-[160px] flex items-center justify-center overflow-hidden">
-              <svg viewBox="0 0 280 120" className="w-full max-w-[260px]" fill="none">
-                <rect x="20" y="20" width="240" height="80" stroke="#475569" strokeWidth="1.5" />
-                <rect x="30" y="30" width="100" height="60" fill="#1e293b" stroke="#334155" />
-                <rect x="150" y="30" width="100" height="60" fill="#1e293b" stroke="#334155" />
-                {/* Corridor */}
-                <rect x="130" y="30" width="20" height="60" fill="rgba(239, 68, 68, 0.25)" stroke="#ef4444" strokeWidth="1.2" strokeDasharray="3 2" />
-                <line x1="130" y1="90" x2="150" y2="90" stroke="#10b981" strokeWidth="2" />
+            {/* Card 2: Analyzed Floor Plan with Color Fills and Floating Red Violation Tag */}
+            <div className="relative p-5 rounded-2xl bg-[#090D16] border border-[#1E2536] shadow-md overflow-hidden">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-800/80 mb-3 text-[11px] text-slate-400 font-mono">
+                <span className="text-emerald-400">● GEOMETRY EXTRACTED</span>
+                <span className="text-slate-400">CANONICAL MODEL v1</span>
+              </div>
+              <svg viewBox="0 0 400 160" className="w-full h-auto" fill="none">
+                {/* Rooms with color fills */}
+                <rect x="30" y="15" width="130" height="65" fill="rgba(16, 185, 129, 0.12)" stroke="#10b981" strokeWidth="1" />
+                <rect x="30" y="85" width="130" height="65" fill="rgba(16, 185, 129, 0.12)" stroke="#10b981" strokeWidth="1" />
+                <rect x="250" y="15" width="120" height="65" fill="rgba(6, 182, 212, 0.12)" stroke="#06b6d4" strokeWidth="1" />
+                <rect x="250" y="85" width="120" height="65" fill="rgba(6, 182, 212, 0.12)" stroke="#06b6d4" strokeWidth="1" />
+
+                {/* Corridor with Red Violation Highlight */}
+                <rect x="165" y="15" width="80" height="135" fill="rgba(239, 68, 68, 0.18)" stroke="#ef4444" strokeWidth="1.5" strokeDasharray="3 3" />
+
+                {/* Egress Path Line */}
+                <path d="M 95 45 L 205 45 L 205 150" stroke="#f59e0b" strokeWidth="1.5" strokeDasharray="4 2" />
+                <circle cx="205" cy="150" r="4" fill="#10b981" />
               </svg>
 
-              {/* Red Violation Tag */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-2.5 py-1 rounded-md bg-rose-600 text-white text-[10px] font-bold flex items-center gap-1 shadow-lg">
-                <AlertTriangle className="w-3 h-3" />
+              {/* Red Violation Tag Badge positioned over corridor */}
+              <div className="absolute top-[52%] left-[51%] -translate-x-1/2 -translate-y-1/2 px-3 py-1 rounded-md bg-[#DC2626] text-white text-[11px] font-bold flex items-center gap-1.5 shadow-xl animate-pulse">
+                <AlertTriangle className="w-3 h-3 shrink-0" />
                 <span>Violation</span>
               </div>
             </div>
 
-            {/* Card 3: Grounded NBC Citation */}
-            <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 text-left">
-              <div className="flex items-center gap-2 text-indigo-400 font-mono text-[11px] font-bold">
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>NBC 2016 · Clause 4.3.2</span>
+            {/* Card 3: JetBrains Code/Citation Dark Card */}
+            <div className="p-5 rounded-2xl bg-[#0C101A] border border-[#1E2536] text-left shadow-md">
+              <div className="text-xs font-mono font-bold text-[#818CF8] tracking-wider uppercase">
+                NBC 2016
               </div>
-              <p className="mt-2 text-xs text-slate-300 font-light leading-relaxed">
+              <div className="text-sm font-bold text-white font-mono mt-1">
+                Clause 4.3.2
+              </div>
+              <p className="mt-2 text-xs text-slate-300 font-normal leading-relaxed">
                 Minimum corridor width shall be 1.5m for residential buildings...
               </p>
             </div>

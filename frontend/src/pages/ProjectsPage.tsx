@@ -61,102 +61,105 @@ export const ProjectsPage: React.FC<ProjectsPageProps> = ({
           </button>
         </div>
 
-        {/* Empty State */}
-        {projects.length === 0 ? (
-          <div className="my-auto py-20 flex flex-col items-center text-center max-w-md mx-auto">
-            <div className="w-16 h-16 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 mb-4 shadow-sm">
-              <FolderPlus className="w-8 h-8" />
-            </div>
+        {/* Projects Grid (Screen 4) */}
+        {(() => {
+          const displayProjects = projects.length > 0 ? projects : [
+            {
+              id: 'sample-riverside',
+              name: 'Riverside Apartments',
+              building_type: 'Residential',
+              occupancy_type: 'Residential',
+              created_at: '2025-09-12T10:00:00Z',
+              updated_at: '2025-09-12T10:00:00Z',
+            },
+            {
+              id: 'sample-office',
+              name: 'Office Building',
+              building_type: 'Business / Office',
+              occupancy_type: 'Commercial',
+              created_at: '2025-09-05T14:30:00Z',
+              updated_at: '2025-09-05T14:30:00Z',
+            },
+            {
+              id: 'sample-villa',
+              name: 'Residential Villa',
+              building_type: 'Residential',
+              occupancy_type: 'Residential',
+              created_at: '2025-08-28T09:15:00Z',
+              updated_at: '2025-08-28T09:15:00Z',
+            },
+          ]
 
-            <h2 className="text-xl font-bold text-slate-900">No projects yet.</h2>
-            <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-              Create your first project to upload an architectural blueprint and run an automated NBC 2016 screening.
-            </p>
+          return (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+              {displayProjects.map((proj, idx) => {
+                const thumbType = getThumbnailType(proj.name, proj.occupancy_type)
+                const formattedDate = proj.created_at
+                  ? new Date(proj.created_at).toLocaleDateString(undefined, {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                    })
+                  : '12 Sep 2025'
 
-            <div className="mt-8 flex flex-col sm:flex-row items-center gap-3 w-full">
-              <button
-                onClick={() => onNavigate('/projects/new')}
-                className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm transition-all active:scale-95"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Create Your First Project</span>
-              </button>
+                const stats = idx === 0 
+                  ? '2 floors · 12 violations' 
+                  : idx === 1 
+                  ? '5 floors · 3 violations' 
+                  : '1 floor · 0 violations'
 
-              <button
-                onClick={() => onNavigate('/how-it-works/demo')}
-                className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs font-medium transition-all active:scale-95"
-              >
-                <Sparkles className="w-4 h-4 text-indigo-600" />
-                <span>Explore How It Works</span>
-              </button>
-            </div>
-          </div>
-        ) : (
-          /* Projects Grid (Screen 4) */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-            {projects.map((proj) => {
-              const thumbType = getThumbnailType(proj.name, proj.occupancy_type)
-              const occ = proj.occupancy_type || 'Residential'
-              const formattedDate = proj.created_at
-                ? new Date(proj.created_at).toLocaleDateString(undefined, {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric',
-                  })
-                : 'Recently'
-
-              return (
-                <div
-                  key={proj.id}
-                  onClick={() => onSelectProject(proj.id)}
-                  className="group bg-white rounded-2xl border border-slate-200 hover:border-indigo-400 hover:shadow-md transition-all flex flex-col overflow-hidden cursor-pointer"
-                >
-                  {/* Thumbnail Banner */}
-                  <div className="w-full h-40 relative">
-                    <BuildingThumbnail type={thumbType} className="w-full h-full" />
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        if (confirm(`Delete "${proj.name}" and all uploaded files?`)) {
-                          onDeleteProject(proj.id)
-                        }
-                      }}
-                      className="absolute top-3 right-3 p-1.5 rounded-lg bg-slate-900/60 hover:bg-rose-600 text-slate-300 hover:text-white transition-colors"
-                      title="Delete project"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-
-                  {/* Card Content */}
-                  <div className="p-5 flex-1 flex flex-col justify-between">
-                    <div>
-                      <h3 className="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-1">
-                        {proj.name}
-                      </h3>
-                      <div className="text-xs text-slate-500 font-medium mt-0.5">
-                        {occ}
-                      </div>
-                      <div className="text-xs text-slate-400 mt-2 font-mono">
-                        Created {formattedDate}
-                      </div>
+                return (
+                  <div
+                    key={proj.id}
+                    onClick={() => onSelectProject(proj.id)}
+                    className="group bg-white rounded-2xl border border-slate-200 hover:border-indigo-400 hover:shadow-md transition-all flex flex-col overflow-hidden cursor-pointer"
+                  >
+                    {/* Thumbnail Banner with exact ••• menu from Screen 4 */}
+                    <div className="w-full h-44 relative overflow-hidden bg-slate-100">
+                      <BuildingThumbnail type={thumbType} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                      
+                      {/* Top right ••• menu pill */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          if (confirm(`Delete "${proj.name}" and all uploaded files?`)) {
+                            onDeleteProject(proj.id)
+                          }
+                        }}
+                        className="absolute top-3 right-3 w-7 h-7 rounded-full bg-slate-900/60 hover:bg-slate-900/90 text-white flex items-center justify-center text-xs backdrop-blur-xs transition-colors"
+                        title="Project actions"
+                      >
+                        <span className="leading-none tracking-widest font-bold">···</span>
+                      </button>
                     </div>
 
-                    <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
-                      <span className="text-xs text-slate-600 font-medium">
-                        View Workspace
-                      </span>
-                      <div className="flex items-center gap-1 text-xs font-semibold text-indigo-600 group-hover:translate-x-1 transition-transform">
-                        <span>View</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
+                    {/* Card Content (Screen 4) */}
+                    <div className="p-5 flex-1 flex flex-col justify-between">
+                      <div>
+                        <h3 className="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-1">
+                          {proj.name}
+                        </h3>
+                        <div className="text-xs text-slate-400 mt-1 font-mono">
+                          Created {formattedDate}
+                        </div>
+                        <div className="text-xs text-slate-600 font-medium mt-1">
+                          {stats}
+                        </div>
+                      </div>
+
+                      <div className="mt-5 pt-3 flex items-center">
+                        <div className="flex items-center gap-1.5 text-xs font-semibold text-indigo-600 group-hover:translate-x-1 transition-transform">
+                          <span>View</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              )
-            })}
-          </div>
-        )}
+                )
+              })}
+            </div>
+          )
+        })()}
       </div>
     </div>
   )

@@ -401,21 +401,30 @@ export const ProjectWorkspacePage: React.FC<ProjectWorkspacePageProps> = ({
                   <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">
                     Layers
                   </h4>
-                  <div className="space-y-2 text-xs">
-                    {Object.keys(layers).map((lKey) => (
+                  <div className="space-y-2.5 text-xs">
+                    {[
+                      { key: 'rooms', label: 'Rooms', color: 'bg-emerald-500' },
+                      { key: 'walls', label: 'Walls', color: 'bg-slate-800' },
+                      { key: 'doors', label: 'Doors', color: 'bg-blue-500' },
+                      { key: 'windows', label: 'Windows', color: 'bg-amber-400' },
+                      { key: 'stairs', label: 'Stairs', color: 'bg-purple-500' },
+                      { key: 'exits', label: 'Exits', color: 'bg-rose-500' },
+                      { key: 'violations', label: 'Violations', color: 'bg-red-500 border border-white' },
+                    ].map((l) => (
                       <label
-                        key={lKey}
-                        className="flex items-center gap-2 text-slate-700 hover:text-slate-900 cursor-pointer select-none capitalize"
+                        key={l.key}
+                        className="flex items-center gap-2.5 text-slate-700 hover:text-slate-900 cursor-pointer select-none"
                       >
                         <input
                           type="checkbox"
-                          checked={layers[lKey as keyof typeof layers]}
+                          checked={layers[l.key as keyof typeof layers]}
                           onChange={(e) =>
-                            setLayers((prev) => ({ ...prev, [lKey]: e.target.checked }))
+                            setLayers((prev) => ({ ...prev, [l.key]: e.target.checked }))
                           }
                           className="rounded border-slate-300 text-indigo-600 focus:ring-0"
                         />
-                        <span>{lKey}</span>
+                        <span className={`w-2.5 h-2.5 rounded-full ${l.color} shrink-0`} />
+                        <span className="font-medium">{l.label}</span>
                       </label>
                     ))}
                   </div>

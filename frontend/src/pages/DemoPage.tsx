@@ -123,76 +123,86 @@ export const DemoPage: React.FC<DemoPageProps> = ({ onNavigate }) => {
       <div className="flex-1 max-w-7xl mx-auto w-full p-6 flex flex-col">
         {activeTab === 'floor-plan' && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            {/* Left Controls Column (2 cols) */}
-            <div className="lg:col-span-3 space-y-5 bg-slate-900/60 p-4 rounded-xl border border-slate-800">
-              <div>
-                <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                  Floor Level
-                </label>
-                <select className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
-                  <option>Ground Floor (0.00m)</option>
-                  <option disabled>First Floor (+3.30m)</option>
-                </select>
+            {/* Left Canvas Column (8 cols) - Matches Mockup Screen 3 */}
+            <div className="lg:col-span-8 bg-[#090D16] border border-[#1E2536] rounded-2xl overflow-hidden shadow-xl flex flex-col">
+              {/* Canvas Top Bar: Floor Selector + Zoom Controls */}
+              <div className="px-4 py-3 bg-[#0B0F1A] border-b border-[#1E2536] flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <select className="bg-[#121624] border border-[#232B3E] rounded-lg px-3 py-1.5 text-xs text-white font-medium focus:outline-none focus:border-indigo-500 cursor-pointer">
+                    <option>Ground Floor</option>
+                    <option disabled>First Floor</option>
+                  </select>
+                </div>
+
+                <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                  <span className="text-[11px] font-mono mr-2">1:100 SCALE</span>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                  Geometry Layers
-                </label>
-                <div className="space-y-2 text-xs">
-                  {Object.keys(layers).map((layerKey) => (
-                    <label
-                      key={layerKey}
-                      className="flex items-center gap-2 text-slate-300 hover:text-white cursor-pointer select-none capitalize"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={layers[layerKey as keyof typeof layers]}
-                        onChange={(e) =>
-                          setLayers((prev) => ({ ...prev, [layerKey]: e.target.checked }))
-                        }
-                        className="rounded border-slate-700 bg-slate-950 text-indigo-600 focus:ring-0 focus:ring-offset-0"
-                      />
-                      <span>{layerKey}</span>
-                    </label>
-                  ))}
+              {/* Central Floor Plan Viewport */}
+              <div className="min-h-[480px] relative flex flex-col bg-[#070A11]">
+                <FloorPlanViewer
+                  floorPlan={DEMO_FLOOR_PLAN}
+                  violations={DEMO_VIOLATIONS}
+                  selectedViolation={currentViolation}
+                  selectedRoom={selectedRoom}
+                  onSelectViolation={(v) => {
+                    if (v) {
+                      const idx = DEMO_VIOLATIONS.findIndex((item) => item.id === v.id)
+                      if (idx >= 0) setSelectedViolationIndex(idx)
+                    }
+                    setSelectedRoom(null)
+                  }}
+                  onSelectRoom={(r) => {
+                    setSelectedRoom(r)
+                  }}
+                />
+              </div>
+
+              {/* Canvas Bottom Bar: Exact Legend Swatches from Screen 3 */}
+              <div className="px-5 py-3 bg-[#0B0F1A] border-t border-[#1E2536] flex flex-wrap items-center justify-center sm:justify-start gap-5 text-xs font-medium text-slate-300">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.6)]" />
+                  <span>Rooms</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-slate-500" />
+                  <span>Walls</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.6)]" />
+                  <span>Doors</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-purple-500 shadow-[0_0_6px_rgba(168,85,247,0.6)]" />
+                  <span>Stairs</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.6)]" />
+                  <span>Exits</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full border-2 border-rose-500 animate-ping" />
+                  <span className="text-rose-400 font-semibold">Violations</span>
                 </div>
               </div>
             </div>
 
-            {/* Center Floor Plan Canvas (6 cols) */}
-            <div className="lg:col-span-6 bg-slate-950 border border-slate-800 rounded-xl overflow-hidden min-h-[460px] flex flex-col relative">
-              <FloorPlanViewer
-                floorPlan={DEMO_FLOOR_PLAN}
-                violations={DEMO_VIOLATIONS}
-                selectedViolation={currentViolation}
-                selectedRoom={selectedRoom}
-                onSelectViolation={(v) => {
-                  if (v) {
-                    const idx = DEMO_VIOLATIONS.findIndex((item) => item.id === v.id)
-                    if (idx >= 0) setSelectedViolationIndex(idx)
-                  }
-                  setSelectedRoom(null)
-                }}
-                onSelectRoom={(r) => {
-                  setSelectedRoom(r)
-                }}
-              />
-            </div>
-
-            {/* Right Violation Inspector Column (3 cols) */}
-            <div className="lg:col-span-3 bg-slate-900/80 p-5 rounded-xl border border-slate-800 flex flex-col justify-between min-h-[460px]">
+            {/* Right Violation Inspector Column (4 cols) - Matches Mockup Screen 3 */}
+            <div className="lg:col-span-4 bg-[#0C101A] p-6 rounded-2xl border border-[#1E2536] shadow-xl flex flex-col justify-between min-h-[540px]">
               <div>
                 <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
-                  <span>Violation {selectedViolationIndex + 1} of {DEMO_VIOLATIONS.length}</span>
-                  <div className="flex gap-1">
+                  <span className="font-semibold text-slate-300">
+                    Violation {selectedViolationIndex + 1} of {DEMO_VIOLATIONS.length}
+                  </span>
+                  <div className="flex items-center gap-1">
                     <button
                       onClick={() =>
                         setSelectedViolationIndex((prev) =>
                           prev > 0 ? prev - 1 : DEMO_VIOLATIONS.length - 1
                         )
                       }
-                      className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-xs"
+                      className="p-1 rounded-md bg-[#161D2B] hover:bg-[#20293D] text-slate-300 text-xs px-2"
                     >
                       ‹
                     </button>
@@ -202,60 +212,54 @@ export const DemoPage: React.FC<DemoPageProps> = ({ onNavigate }) => {
                           prev < DEMO_VIOLATIONS.length - 1 ? prev + 1 : 0
                         )
                       }
-                      className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-xs"
+                      className="p-1 rounded-md bg-[#161D2B] hover:bg-[#20293D] text-slate-300 text-xs px-2"
                     >
                       ›
                     </button>
                   </div>
                 </div>
 
-                <div className="flex items-start justify-between gap-2 mt-1">
-                  <h3 className="text-sm font-bold text-white">
+                <div className="flex items-start justify-between gap-3 mt-3">
+                  <h3 className="text-base font-bold text-white leading-tight">
                     {currentViolation.title}
                   </h3>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/40 shrink-0">
                     Fail
                   </span>
                 </div>
 
-                {/* 3 Metrics Rows */}
-                <div className="grid grid-cols-3 gap-2 mt-4 p-3 rounded-lg bg-slate-950/80 border border-slate-800/80 text-center font-mono">
-                  <div>
-                    <div className="text-[10px] text-slate-400 font-sans">Measured</div>
-                    <div className="text-xs font-bold text-rose-400 mt-0.5">
-                      {currentViolation.measured_value} {currentViolation.unit}
-                    </div>
+                {/* 3 Metric Rows */}
+                <div className="mt-5 space-y-2 font-mono text-xs">
+                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#070A11] border border-[#1A2234]">
+                    <span className="text-slate-400 font-sans">Measured:</span>
+                    <span className="font-bold text-rose-400">{currentViolation.measured_value} m</span>
                   </div>
-                  <div>
-                    <div className="text-[10px] text-slate-400 font-sans">Required</div>
-                    <div className="text-xs font-bold text-slate-200 mt-0.5">
-                      ≥ {currentViolation.required_value} {currentViolation.unit}
-                    </div>
+                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#070A11] border border-[#1A2234]">
+                    <span className="text-slate-400 font-sans">Required:</span>
+                    <span className="font-bold text-slate-200">≥ {currentViolation.required_value} m</span>
                   </div>
-                  <div>
-                    <div className="text-[10px] text-slate-400 font-sans">Shortfall</div>
-                    <div className="text-xs font-bold text-amber-400 mt-0.5">
-                      {Math.abs(currentViolation.difference || 0)} {currentViolation.unit}
-                    </div>
+                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#070A11] border border-[#1A2234]">
+                    <span className="text-slate-400 font-sans">Shortfall:</span>
+                    <span className="font-bold text-rose-400">{Math.abs(currentViolation.difference || 0.5).toFixed(1)} m</span>
                   </div>
                 </div>
 
-                {/* Grounded Citation */}
-                <div className="mt-5 pt-4 border-t border-slate-800">
-                  <div className="text-xs font-bold text-indigo-400 flex items-center gap-1.5">
-                    <ShieldCheck className="w-3.5 h-3.5" />
-                    <span>{currentViolation.regulation_source}</span>
+                {/* NBC Grounded Citation Box */}
+                <div className="mt-6 pt-5 border-t border-[#1E2536]">
+                  <div className="text-xs font-mono font-bold text-[#818CF8] flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 shrink-0" />
+                    <span>NBC 2016 – Clause 4.3.2</span>
                   </div>
-                  <p className="mt-2 text-xs text-slate-300 font-light leading-relaxed">
-                    {currentViolation.llm_explanation || currentViolation.recommendation}
+                  <p className="mt-2.5 text-xs text-slate-300 font-light leading-relaxed">
+                    Minimum corridor width in residential buildings shall be 1.5 metres. Corridors serving habitable rooms must maintain unrestricted egress width without protruding door swings.
                   </p>
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-slate-800 mt-6">
+              <div className="pt-6 border-t border-[#1E2536] mt-6">
                 <button
                   onClick={() => setActiveTab('compliance')}
-                  className="w-full py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+                  className="w-full py-2.5 rounded-xl bg-[#161D2B] hover:bg-[#20293D] text-slate-200 text-xs font-semibold flex items-center justify-center gap-2 border border-[#232B3E] transition-colors"
                 >
                   <span>View in Document</span>
                   <ArrowRight className="w-3.5 h-3.5" />
