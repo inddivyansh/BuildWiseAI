@@ -54,10 +54,10 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
   const verifiedPassed = results.filter((r) => r.status === 'PASS')
   const insufficientResults = results.filter((r) => r.status === 'INSUFFICIENT_DATA')
 
-  const complianceScorePct = summary?.compliance_score_pct ?? 85
-  const violationCount = failedResults.length > 0 ? failedResults.length : 12
-  const floorsCount = buildingMetadata?.floor_count || floorPlan?.floor_count || 2
-  const projectName = buildingMetadata?.source_file?.replace(/\.[^/.]+$/, '') || 'Riverside Apartments'
+  const complianceScorePct = summary?.compliance_score_pct ?? 0
+  const violationCount = failedResults.length
+  const floorsCount = buildingMetadata?.floor_count || floorPlan?.floor_count || 0
+  const projectName = buildingMetadata?.source_file?.replace(/\.[^/.]+$/, '') || 'Untitled Project'
 
   const reportSections = [
     { id: 'executive-summary', label: 'Executive Summary', page: 1 },

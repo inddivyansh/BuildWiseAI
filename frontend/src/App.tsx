@@ -63,18 +63,27 @@ const AppShell: React.FC = () => {
   // Helper component for workspace routes
   const WorkspaceRouteWrapper = ({ tab }: { tab: string }) => {
     const { id } = useParams<{ id: string }>()
-    const project = projects.find((p) => p.id === id) || {
-      id: id || 'current-project',
-      name: 'Riverside Apartments',
-      building_type: 'Residential',
-      occupancy_type: 'Residential',
+    const project = projects.find((p) => p.id === id)
+
+    // If project not found and list is loaded, redirect to projects
+    if (!project && projects.length > 0) {
+      navigate('/projects')
+      return null
+    }
+
+    // While projects are still loading, use a minimal stub with the real ID
+    const resolvedProject = project || {
+      id: id || '',
+      name: 'Loading...',
+      building_type: '',
+      occupancy_type: '',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }
 
     return (
       <ProjectWorkspacePage
-        project={project}
+        project={resolvedProject}
         initialTab={tab}
         onNavigate={(route) => navigate(route)}
       />
@@ -85,19 +94,20 @@ const AppShell: React.FC = () => {
   const ProgressRouteWrapper = () => {
     const { id } = useParams<{ id: string }>()
     const [searchParams] = useSearchParams()
-    const runId = searchParams.get('runId') || 'latest-run'
-    const project = projects.find((p) => p.id === id) || {
-      id: id || 'project',
-      name: 'Riverside Apartments',
-      building_type: 'Residential',
-      occupancy_type: 'Residential',
+    const runId = searchParams.get('runId') || ''
+
+    const resolvedProject = projects.find((p) => p.id === id) || {
+      id: id || '',
+      name: 'Loading...',
+      building_type: '',
+      occupancy_type: '',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }
 
     return (
       <AnalysisProgressPage
-        project={project}
+        project={resolvedProject}
         runId={runId}
         onNavigate={(route) => navigate(route)}
       />

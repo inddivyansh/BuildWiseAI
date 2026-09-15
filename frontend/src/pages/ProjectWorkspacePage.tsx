@@ -152,7 +152,7 @@ export const ProjectWorkspacePage: React.FC<ProjectWorkspacePageProps> = ({
     }
   }
 
-  const complianceScorePct = complianceSummary?.compliance_score_pct ?? 85
+  const complianceScorePct = complianceSummary?.compliance_score_pct ?? 0
 
   return (
     <div className="min-h-screen bg-[#000000] text-[#F8FAFC] flex flex-col font-sans selection:bg-[#6B57FF] selection:text-white">
