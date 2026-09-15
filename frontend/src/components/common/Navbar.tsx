@@ -128,18 +128,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <span className="absolute -bottom-2 left-0 right-0 h-[2px] bg-[#6B57FF] rounded-full" />
               )}
             </button>
-
-            <button
-              onClick={() => onNavigate('/how-it-works/demo')}
-              className={`transition-colors py-1 flex items-center gap-1.5 ${
-                currentRoute.startsWith('/how-it-works/demo')
-                  ? 'text-white font-semibold'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Interactive Demo</span>
-            </button>
           </nav>
         )}
 

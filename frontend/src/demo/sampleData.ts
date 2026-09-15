@@ -97,7 +97,7 @@ export const DEMO_FLOOR_PLAN: CanonicalFloorPlan = {
         {
           id: 'room-living',
           room_type: 'living_room',
-          label: 'LIVING ROOM / LOUNGE',
+          label: 'LIVING ROOM',
           boundary: {
             vertices: [
               { x: 0, y: 0 },
@@ -113,7 +113,7 @@ export const DEMO_FLOOR_PLAN: CanonicalFloorPlan = {
         {
           id: 'room-kitchen',
           room_type: 'kitchen',
-          label: 'KITCHEN / BREAKROOM',
+          label: 'KITCHEN',
           boundary: {
             vertices: [
               { x: 7.0, y: 0 },
@@ -129,7 +129,7 @@ export const DEMO_FLOOR_PLAN: CanonicalFloorPlan = {
         {
           id: 'room-corridor',
           room_type: 'corridor',
-          label: 'MAIN EGRESS CORRIDOR',
+          label: 'CORRIDOR',
           boundary: {
             vertices: [
               { x: 0, y: 3.62 },
@@ -145,7 +145,7 @@ export const DEMO_FLOOR_PLAN: CanonicalFloorPlan = {
         {
           id: 'room-bed1',
           room_type: 'bedroom',
-          label: 'MASTER BEDROOM / OFFICE 01',
+          label: 'BEDROOM 1',
           boundary: {
             vertices: [
               { x: 0, y: 4.80 },
@@ -161,7 +161,7 @@ export const DEMO_FLOOR_PLAN: CanonicalFloorPlan = {
         {
           id: 'room-bed2',
           room_type: 'bedroom',
-          label: 'BEDROOM 02 / OFFICE STUDIO',
+          label: 'BEDROOM 2',
           boundary: {
             vertices: [
               { x: 4.5, y: 4.80 },
@@ -177,7 +177,7 @@ export const DEMO_FLOOR_PLAN: CanonicalFloorPlan = {
         {
           id: 'room-bath',
           room_type: 'bathroom',
-          label: 'BATHROOM / WASHROOM',
+          label: 'BATHROOM',
           boundary: {
             vertices: [
               { x: 8.5, y: 4.80 },

@@ -293,28 +293,26 @@ export const InteractiveDemoStudio: React.FC<InteractiveDemoStudioProps> = ({
                 let strokeWidth = '0.04'
 
                 if (isCorridor) {
-                  // Corridor has deliberate violation!
                   fillColor = isSelectedCorridor
-                    ? 'rgba(244, 63, 94, 0.22)'
-                    : 'rgba(244, 63, 94, 0.10)'
-                  strokeColor = isSelectedCorridor ? '#F43F5E' : 'rgba(244, 63, 94, 0.5)'
-                  strokeWidth = isSelectedCorridor ? '0.09' : '0.05'
+                    ? 'rgba(244, 63, 94, 0.20)'
+                    : 'rgba(244, 63, 94, 0.08)'
+                  strokeColor = isSelectedCorridor ? '#F43F5E' : 'rgba(244, 63, 94, 0.45)'
+                  strokeWidth = isSelectedCorridor ? '0.07' : '0.04'
                 } else if (isSelectedRoom) {
-                  fillColor = 'rgba(16, 185, 129, 0.18)'
+                  fillColor = 'rgba(16, 185, 129, 0.16)'
                   strokeColor = '#10B981'
-                  strokeWidth = '0.08'
+                  strokeWidth = '0.07'
                 } else if (isHovered) {
                   fillColor = 'rgba(99, 102, 241, 0.15)'
                   strokeColor = '#6366F1'
                 }
 
-                // Centroid coordinates
-                const cx =
-                  room.boundary.vertices.reduce((acc, v) => acc + v.x, 0) /
-                  room.boundary.vertices.length
+                // Centroid coordinates (for corridor, offset to the left at x=2.5 to avoid any doors or callouts)
+                const cx = isCorridor
+                  ? 2.5
+                  : room.boundary.vertices.reduce((acc, v) => acc + v.x, 0) / room.boundary.vertices.length
                 const cy =
-                  room.boundary.vertices.reduce((acc, v) => acc + v.y, 0) /
-                  room.boundary.vertices.length
+                  room.boundary.vertices.reduce((acc, v) => acc + v.y, 0) / room.boundary.vertices.length
 
                 return (
                   <g
@@ -325,9 +323,8 @@ export const InteractiveDemoStudio: React.FC<InteractiveDemoStudioProps> = ({
                     onClick={(e) => {
                       e.stopPropagation()
                       if (isCorridor) {
-                        handleSelectFinding(DEMO_FINDINGS[0]) // Corridor violation
+                        handleSelectFinding(DEMO_FINDINGS[0])
                       } else {
-                        // Find matching passing room check or default
                         const passFinding = DEMO_FINDINGS.find((f) => f.entity_id === room.id)
                         if (passFinding) handleSelectFinding(passFinding)
                       }
@@ -338,41 +335,42 @@ export const InteractiveDemoStudio: React.FC<InteractiveDemoStudioProps> = ({
                       fill={fillColor}
                       stroke={strokeColor}
                       strokeWidth={strokeWidth}
-                      strokeDasharray={isSelectedCorridor ? '0.15 0.08' : 'none'}
+                      strokeDasharray={isSelectedCorridor ? '0.12 0.06' : 'none'}
                       className="transition-colors duration-200"
                     />
 
-                    {/* Room Label */}
+                    {/* Clean Room Label */}
                     <text
                       x={cx}
-                      y={cy - 0.18}
+                      y={isCorridor ? cy : cy - 0.10}
                       textAnchor="middle"
                       dominantBaseline="middle"
                       fill={isCorridor ? '#FDA4AF' : isSelectedRoom ? '#6EE7B7' : '#CBD5E1'}
-                      fontSize="0.28"
+                      fontSize="0.20"
                       fontFamily="Outfit, sans-serif"
-                      fontWeight="700"
-                      letterSpacing="0.02em"
+                      fontWeight="600"
+                      letterSpacing="0.06em"
                       pointerEvents="none"
                     >
                       {room.label}
                     </text>
 
-                    {/* Room Area Metric */}
-                    <text
-                      x={cx}
-                      y={cy + 0.22}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      fill={isCorridor ? '#F43F5E' : '#94A3B8'}
-                      fontSize="0.22"
-                      fontFamily="monospace"
-                      fontWeight="600"
-                      pointerEvents="none"
-                    >
-                      {room.area_m2 ? room.area_m2.toFixed(1) : '—'} m²
-                      {isCorridor && ' · CLEAR 1.18m (FAIL)'}
-                    </text>
+                    {/* Room Area Metric (omitted on corridor to prevent clutter) */}
+                    {!isCorridor && room.area_m2 && (
+                      <text
+                        x={cx}
+                        y={cy + 0.14}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        fill={isSelectedRoom ? '#A7F3D0' : '#64748B'}
+                        fontSize="0.15"
+                        fontFamily="monospace"
+                        fontWeight="500"
+                        pointerEvents="none"
+                      >
+                        {room.area_m2.toFixed(1)} m²
+                      </text>
+                    )}
                   </g>
                 )
               })}
@@ -429,17 +427,15 @@ export const InteractiveDemoStudio: React.FC<InteractiveDemoStudioProps> = ({
                 .map((door) => {
                   const isViolatedDoor = door.id === 'op-bed2-door'
                   const isSelectedDoor = activeFinding.entity_id === door.id
-                  const isHovered = hoveredEntityId === door.id
                   const isExit = door.id === 'op-main-exit'
 
                   const dw = door.width_m || 0.85
                   const px = door.position.x
                   const py = door.position.y
 
-                  // Door colors
                   let doorColor = '#38BDF8'
                   if (isViolatedDoor) {
-                    doorColor = isSelectedDoor ? '#F97316' : '#FB923C'
+                    doorColor = '#F97316'
                   } else if (isExit) {
                     doorColor = '#10B981'
                   }
@@ -453,9 +449,9 @@ export const InteractiveDemoStudio: React.FC<InteractiveDemoStudioProps> = ({
                       onClick={(e) => {
                         e.stopPropagation()
                         if (isViolatedDoor) {
-                          handleSelectFinding(DEMO_FINDINGS[1]) // Door violation
+                          handleSelectFinding(DEMO_FINDINGS[1])
                         } else if (isExit) {
-                          handleSelectFinding(DEMO_FINDINGS[5]) // Exit check
+                          handleSelectFinding(DEMO_FINDINGS[5])
                         }
                       }}
                     >
@@ -466,18 +462,18 @@ export const InteractiveDemoStudio: React.FC<InteractiveDemoStudioProps> = ({
                         x2={px + dw / 2}
                         y2={py}
                         stroke={doorColor}
-                        strokeWidth={isSelectedDoor ? '0.08' : '0.05'}
+                        strokeWidth={isSelectedDoor ? '0.07' : '0.04'}
                       />
 
-                      {/* Realistic Door Leaf Swing Arc (quarter circle) */}
+                      {/* Realistic Door Leaf Swing Arc */}
                       {!isExit && (
                         <path
                           d={`M ${px - dw / 2} ${py} A ${dw} ${dw} 0 0 1 ${px + dw / 2} ${py + dw * 0.8}`}
                           fill="none"
                           stroke={doorColor}
-                          strokeWidth="0.03"
-                          strokeDasharray="0.08 0.04"
-                          opacity="0.75"
+                          strokeWidth="0.025"
+                          strokeDasharray="0.06 0.03"
+                          opacity="0.6"
                         />
                       )}
 
@@ -487,49 +483,65 @@ export const InteractiveDemoStudio: React.FC<InteractiveDemoStudioProps> = ({
                           <circle
                             cx={px}
                             cy={py}
-                            r={isSelectedDoor ? 0.45 : 0.35}
-                            fill="rgba(249, 115, 22, 0.25)"
+                            r={isSelectedDoor ? 0.32 : 0.24}
+                            fill="rgba(249, 115, 22, 0.20)"
                             stroke="#F97316"
-                            strokeWidth="0.04"
-                            strokeDasharray={isSelectedDoor ? '0.08 0.04' : 'none'}
+                            strokeWidth="0.03"
+                            strokeDasharray={isSelectedDoor ? '0.06 0.03' : 'none'}
                           />
-                          <text
-                            x={px}
-                            y={py - 0.45}
-                            textAnchor="middle"
-                            fill="#F97316"
-                            fontSize="0.22"
-                            fontFamily="monospace"
-                            fontWeight="700"
-                          >
-                            0.75m (FAIL &lt; 0.90m)
-                          </text>
+                          {/* Callout tag placed INSIDE Bedroom 2 (Y=5.35) ONLY when door finding is selected */}
+                          {isSelectedDoor && (
+                            <g>
+                              <rect
+                                x={px - 1.15}
+                                y={py + 0.35}
+                                width="2.3"
+                                height="0.42"
+                                rx="0.08"
+                                fill="#261005"
+                                stroke="#F97316"
+                                strokeWidth="0.03"
+                              />
+                              <text
+                                x={px}
+                                y={py + 0.62}
+                                textAnchor="middle"
+                                fill="#FED7AA"
+                                fontSize="0.16"
+                                fontFamily="monospace"
+                                fontWeight="800"
+                              >
+                                0.75m (REQ: ≥ 0.90m)
+                              </text>
+                            </g>
+                          )}
                         </g>
                       )}
 
-                      {/* Main Exit Visual Marker */}
+                      {/* Main Exit Visual Marker (Compact & clean at wall edge) */}
                       {isExit && (
                         <g>
                           <rect
-                            x={px - 0.45}
-                            y={py - 0.55}
-                            width="0.9"
-                            height="1.1"
-                            fill="rgba(16, 185, 129, 0.2)"
+                            x="11.45"
+                            y="3.95"
+                            width="1.0"
+                            height="0.52"
+                            rx="0.08"
+                            fill="#042F1A"
                             stroke="#10B981"
-                            strokeWidth="0.04"
+                            strokeWidth="0.03"
                           />
                           <text
-                            x={px - 0.85}
-                            y={py}
-                            textAnchor="end"
+                            x="11.95"
+                            y="4.28"
+                            textAnchor="middle"
                             dominantBaseline="middle"
-                            fill="#10B981"
-                            fontSize="0.24"
+                            fill="#34D399"
+                            fontSize="0.16"
                             fontFamily="Outfit, sans-serif"
                             fontWeight="800"
                           >
-                            FINAL EXIT →
+                            EXIT →
                           </text>
                         </g>
                       )}
@@ -537,56 +549,65 @@ export const InteractiveDemoStudio: React.FC<InteractiveDemoStudioProps> = ({
                   )
                 })}
 
-              {/* 5. EGRESS PATH TRACE (Living room to Final Exit) */}
-              {(activeFinding.key === 'travel_distance' || activeFinding.category === 'passing') && (
+              {/* 5. EGRESS PATH TRACE (Drawn cleanly when travel distance is active) */}
+              {activeFinding.key === 'travel_distance' && (
                 <g>
                   <polyline
-                    points="2.0,2.0 3.55,3.62 6.0,4.21 12.0,4.21"
+                    points="3.5,1.81 3.55,3.62 6.0,4.21 11.45,4.21"
                     fill="none"
                     stroke="#10B981"
-                    strokeWidth="0.07"
-                    strokeDasharray="0.2 0.1"
+                    strokeWidth="0.06"
+                    strokeDasharray="0.15 0.08"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
                   {/* Origin node */}
-                  <circle cx="2.0" cy="2.0" r="0.25" fill="#10B981" stroke="#ffffff" strokeWidth="0.03" />
+                  <circle cx="3.5" cy="1.81" r="0.20" fill="#10B981" stroke="#ffffff" strokeWidth="0.02" />
                   {/* Path annotation tag */}
-                  <rect x="5.2" y="3.8" width="2.4" height="0.4" rx="0.1" fill="#0A101D" stroke="#10B981" strokeWidth="0.03" />
+                  <rect x="5.1" y="3.8" width="2.0" height="0.36" rx="0.06" fill="#042F1A" stroke="#10B981" strokeWidth="0.02" />
                   <text
-                    x="6.4"
-                    y="4.05"
+                    x="6.1"
+                    y="4.04"
                     textAnchor="middle"
-                    fill="#10B981"
-                    fontSize="0.20"
+                    fill="#34D399"
+                    fontSize="0.14"
                     fontFamily="monospace"
                     fontWeight="700"
                   >
-                    12.4m Walk (Pass ≤ 30m)
+                    12.4m (Pass ≤ 30m)
                   </text>
                 </g>
               )}
 
-              {/* 6. CORRIDOR DIMENSION CALLOUT ANNOTATION (Visual Highlight) */}
-              {(activeFinding.key === 'corridor_width' || activeFinding.category === 'violation') && (
+              {/* 6. CORRIDOR DIMENSION CALLOUT (Isolated at X=8.5 between Bed 2 and Bath) */}
+              {activeFinding.key === 'corridor_width' && (
                 <g>
-                  {/* Dimension line with arrows across corridor width at X = 8.0 (clean spacing away from door) */}
-                  <line x1="8.0" y1="3.62" x2="8.0" y2="4.80" stroke="#F43F5E" strokeWidth="0.05" />
-                  <line x1="7.7" y1="3.62" x2="8.3" y2="3.62" stroke="#F43F5E" strokeWidth="0.05" />
-                  <line x1="7.7" y1="4.80" x2="8.3" y2="4.80" stroke="#F43F5E" strokeWidth="0.05" />
+                  {/* Vertical dimension line across corridor clear width */}
+                  <line x1="8.5" y1="3.62" x2="8.5" y2="4.80" stroke="#F43F5E" strokeWidth="0.04" />
+                  <line x1="8.25" y1="3.62" x2="8.75" y2="3.62" stroke="#F43F5E" strokeWidth="0.04" />
+                  <line x1="8.25" y1="4.80" x2="8.75" y2="4.80" stroke="#F43F5E" strokeWidth="0.04" />
 
-                  {/* Red Callout Tag */}
-                  <rect x="6.4" y="4.0" width="3.2" height="0.45" rx="0.1" fill="#4C0519" stroke="#F43F5E" strokeWidth="0.04" />
+                  {/* Compact Red Dimension Badge */}
+                  <rect
+                    x="7.35"
+                    y="3.98"
+                    width="2.3"
+                    height="0.44"
+                    rx="0.08"
+                    fill="#2E0812"
+                    stroke="#F43F5E"
+                    strokeWidth="0.03"
+                  />
                   <text
-                    x="8.0"
-                    y="4.28"
+                    x="8.5"
+                    y="4.27"
                     textAnchor="middle"
-                    fill="#FFE4E6"
-                    fontSize="0.20"
+                    fill="#FECDD3"
+                    fontSize="0.16"
                     fontFamily="monospace"
                     fontWeight="800"
                   >
-                    WIDTH: 1.18m (REQ: ≥ 1.50m)
+                    1.18m (REQ: ≥ 1.50m)
                   </text>
                 </g>
               )}
