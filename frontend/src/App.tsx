@@ -51,9 +51,8 @@ const AppShell: React.FC = () => {
     }
   }
 
-  // Determine current page theme (Landing & Demo are dark; App pages are light)
-  const isDarkTheme =
-    location.pathname === '/' || location.pathname.startsWith('/how-it-works/demo')
+  // Unified dark theme across all routes
+  const isDarkTheme = true
 
   // Check if current route is within a project workspace
   const isWorkspaceRoute =

@@ -72,9 +72,9 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
 
   return (
     <div className="w-full flex flex-col lg:flex-row gap-6 items-start">
-      {/* Left Sidebar: Report Sections (Mockup Screen 8) */}
-      <div className="w-full lg:w-64 shrink-0 bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
-        <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3 px-2">
+      {/* Left Sidebar: Report Sections — Dark Theme */}
+      <div className="w-full lg:w-64 shrink-0 bg-[#090C14] rounded-2xl border border-[#1A2133] p-4">
+        <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-3 px-2">
           Report Sections
         </h3>
 
@@ -90,40 +90,40 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                 }}
                 className={`w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition-all flex items-center justify-between ${
                   isActive
-                    ? 'bg-indigo-50 text-indigo-600 font-bold'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    ? 'bg-[#6B57FF]/15 text-[#A594FF] font-bold border border-[#6B57FF]/30'
+                    : 'text-slate-400 hover:bg-[#0F131F] hover:text-slate-200'
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <FileText className={`w-3.5 h-3.5 ${isActive ? 'text-indigo-600' : 'text-slate-400'}`} />
+                  <FileText className={`w-3.5 h-3.5 ${isActive ? 'text-[#A594FF]' : 'text-slate-600'}`} />
                   <span>{sec.label}</span>
                 </div>
-                <span className="text-[10px] text-slate-400 font-mono">p.{sec.page}</span>
+                <span className="text-[10px] text-slate-600 font-mono">p.{sec.page}</span>
               </button>
             )
           })}
         </div>
       </div>
 
-      {/* Right Column: Realistic PDF Document Viewer (Mockup Screen 8) */}
-      <div className="flex-1 w-full flex flex-col bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
-        {/* Document Top Toolbar */}
-        <div className="px-4 py-2.5 bg-white border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600">
+      {/* Right Column: Realistic PDF Document Viewer — Dark Surround */}
+      <div className="flex-1 w-full flex flex-col bg-[#06080E] rounded-2xl border border-[#1A2133] overflow-hidden">
+        {/* Document Top Toolbar — Dark */}
+        <div className="px-4 py-2.5 bg-[#090C14] border-b border-[#1A2133] flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage <= 1}
-              className="p-1.5 rounded-lg hover:bg-slate-100 disabled:opacity-40 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-[#0F131F] disabled:opacity-40 transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <span className="text-xs font-mono font-medium px-1">
+            <span className="text-xs font-mono font-medium px-1 text-slate-300">
               {currentPage} / {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage >= totalPages}
-              className="p-1.5 rounded-lg hover:bg-slate-100 disabled:opacity-40 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-[#0F131F] disabled:opacity-40 transition-colors"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -133,17 +133,17 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={() => setZoomLevel((z) => Math.max(75, z - 10))}
-              className="p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-[#0F131F] transition-colors"
               title="Zoom out"
             >
               <ZoomOut className="w-3.5 h-3.5" />
             </button>
-            <span className="text-xs font-mono font-semibold text-slate-700">
+            <span className="text-xs font-mono font-semibold text-slate-300">
               {zoomLevel}%
             </span>
             <button
               onClick={() => setZoomLevel((z) => Math.min(150, z + 10))}
-              className="p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-[#0F131F] transition-colors"
               title="Zoom in"
             >
               <ZoomIn className="w-3.5 h-3.5" />
@@ -154,7 +154,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrint}
-              className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-[#0F131F] text-slate-400 transition-colors"
               title="Print document"
             >
               <Printer className="w-4 h-4" />
@@ -165,7 +165,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                 href={apiClient.downloadReportPdfUrl(runId)}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-xs transition-all"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#6B57FF] hover:bg-[#7C6AFF] text-white text-xs font-semibold shadow-xs transition-all"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Export PDF</span>
@@ -174,8 +174,8 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
           </div>
         </div>
 
-        {/* Printable Document Paper Viewport */}
-        <div className="p-8 overflow-x-auto flex justify-center bg-[#E5E9F0]">
+        {/* Printable Document Paper Viewport — The A4 paper itself stays white (it's a document) */}
+        <div className="p-8 overflow-x-auto flex justify-center bg-[#040609]">
           {/* A4 Sheet Paper (Screen 8 Cover Page) */}
           <div
             className="w-full max-w-[720px] bg-white rounded-lg shadow-xl border border-slate-300 p-10 sm:p-12 text-center flex flex-col justify-between min-h-[880px] transition-transform duration-200"

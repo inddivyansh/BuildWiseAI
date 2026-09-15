@@ -6,6 +6,10 @@ import {
   FileDown,
   Play,
   FileUp,
+  Search,
+  Sparkles,
+  ExternalLink,
+  ChevronRight,
 } from 'lucide-react'
 
 export interface NavbarProps {
@@ -21,7 +25,6 @@ export interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
-  theme = 'dark',
   currentRoute = '/',
   projectName,
   activeWorkspaceTab = 'floor-plan',
@@ -31,8 +34,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   onExportReport,
   isWorkspace = false,
 }) => {
-  const isDark = theme === 'dark'
-
   const workspaceTabs = [
     { id: 'overview', label: 'Overview' },
     { id: 'floor-plan', label: 'Floor Plan' },
@@ -45,57 +46,56 @@ export const Navbar: React.FC<NavbarProps> = ({
   ]
 
   return (
-    <header
-      className={`sticky top-0 z-40 transition-colors ${
-        isDark
-          ? 'bg-[#0B0F17]/95 border-b border-slate-800/80 text-white'
-          : 'bg-white border-b border-slate-200 text-slate-900'
-      }`}
-    >
-      {/* Primary Navigation Row */}
+    <header className="sticky top-0 z-50 bg-[#000000] border-b border-[#1A1D26] text-white select-none">
+      {/* Primary JetBrains Navigation Bar */}
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         {/* Brand & Breadcrumb */}
         <div className="flex items-center gap-3">
           <button
             onClick={() => onNavigate('/')}
-            className="flex items-center gap-2.5 font-bold text-lg tracking-tight group"
+            className="flex items-center gap-3 group focus:outline-none"
           >
-            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white shadow-sm group-hover:bg-indigo-500 transition-colors">
-              <Layers className="w-4 h-4" />
+            {/* JetBrains-style logo icon */}
+            <div className="relative w-8 h-8 rounded-lg bg-black p-[1.5px] bg-gradient-to-br from-[#FE2857] via-[#9B51E0] to-[#6B57FF] flex items-center justify-center shadow-lg transition-transform group-hover:scale-105">
+              <div className="w-full h-full bg-[#090A0F] rounded-[6px] flex items-center justify-center">
+                <span className="font-mono text-[13px] font-black text-white leading-none tracking-tighter">_BW</span>
+              </div>
             </div>
-            <span className={isDark ? 'text-white' : 'text-slate-900 font-bold'}>
-              BuildWise
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-base font-extrabold tracking-tight text-white group-hover:text-slate-200 transition-colors uppercase">
+                BuildWise
+              </span>
+              <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-[#161B28] text-[#818CF8] border border-[#232B3E]">
+                AI
+              </span>
+            </div>
           </button>
 
           {isWorkspace && projectName && (
-            <div className="hidden sm:flex items-center gap-2 text-sm">
-              <span className={isDark ? 'text-slate-600' : 'text-slate-300'}>/</span>
+            <div className="hidden sm:flex items-center gap-2 text-xs ml-2 pl-3 border-l border-slate-800">
               <button
                 onClick={() => onNavigate('/projects')}
-                className={`text-xs font-medium hover:underline ${
-                  isDark ? 'text-slate-400 hover:text-slate-200' : 'text-slate-500 hover:text-slate-800'
-                }`}
+                className="text-slate-400 hover:text-white transition-colors"
               >
                 Projects
               </button>
-              <span className={isDark ? 'text-slate-600' : 'text-slate-300'}>/</span>
-              <span className={`text-xs font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
+              <ChevronRight className="w-3 h-3 text-slate-600" />
+              <span className="font-semibold text-slate-200 truncate max-w-[200px]">
                 {projectName}
               </span>
             </div>
           )}
         </div>
 
-        {/* Center Links (when not in project workspace) */}
+        {/* Center Links (JetBrains style) */}
         {!isWorkspace && (
-          <nav className="hidden md:flex items-center gap-8 text-xs font-medium">
+          <nav className="hidden md:flex items-center gap-7 text-xs font-medium tracking-wide">
             <button
               onClick={() => onNavigate('/')}
-              className={`transition-colors ${
+              className={`transition-colors py-1 ${
                 currentRoute === '/'
-                  ? isDark ? 'text-white font-semibold' : 'text-indigo-600 font-semibold'
-                  : isDark ? 'text-slate-400 hover:text-slate-200' : 'text-slate-600 hover:text-slate-900'
+                  ? 'text-white font-semibold'
+                  : 'text-slate-400 hover:text-white'
               }`}
             >
               Product
@@ -103,52 +103,54 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             <button
               onClick={() => onNavigate('/how-it-works')}
-              className={`transition-colors relative py-1 ${
-                currentRoute.startsWith('/how-it-works')
-                  ? isDark ? 'text-white font-semibold' : 'text-indigo-600 font-semibold'
-                  : isDark ? 'text-slate-400 hover:text-slate-200' : 'text-slate-600 hover:text-slate-900'
+              className={`transition-colors py-1 relative ${
+                currentRoute === '/how-it-works'
+                  ? 'text-white font-semibold'
+                  : 'text-slate-400 hover:text-white'
               }`}
             >
               How It Works
-              {currentRoute.startsWith('/how-it-works') && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full" />
+              {currentRoute === '/how-it-works' && (
+                <span className="absolute -bottom-2 left-0 right-0 h-[2px] bg-[#6B57FF] rounded-full" />
               )}
             </button>
 
             <button
               onClick={() => onNavigate('/projects')}
-              className={`transition-colors ${
+              className={`transition-colors py-1 relative ${
                 currentRoute.startsWith('/projects')
-                  ? isDark ? 'text-white font-semibold' : 'text-indigo-600 font-semibold'
-                  : isDark ? 'text-slate-400 hover:text-slate-200' : 'text-slate-600 hover:text-slate-900'
+                  ? 'text-white font-semibold'
+                  : 'text-slate-400 hover:text-white'
               }`}
             >
-              {currentRoute === '/' ? 'Pricing' : 'Projects'}
+              Projects
+              {currentRoute.startsWith('/projects') && (
+                <span className="absolute -bottom-2 left-0 right-0 h-[2px] bg-[#6B57FF] rounded-full" />
+              )}
             </button>
 
             <button
-              onClick={() => onNavigate('/how-it-works')}
-              className={`transition-colors ${
-                isDark ? 'text-slate-400 hover:text-slate-200' : 'text-slate-600 hover:text-slate-900'
+              onClick={() => onNavigate('/how-it-works/demo')}
+              className={`transition-colors py-1 flex items-center gap-1.5 ${
+                currentRoute.startsWith('/how-it-works/demo')
+                  ? 'text-white font-semibold'
+                  : 'text-slate-400 hover:text-white'
               }`}
             >
-              {currentRoute === '/' ? 'About' : 'Documentation'}
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Interactive Demo</span>
             </button>
           </nav>
         )}
 
-        {/* Right CTA Actions */}
+        {/* Right CTA Actions (JetBrains White Pill Style) */}
         <div className="flex items-center gap-3">
           {isWorkspace ? (
             <>
               {onExportReport && (
                 <button
                   onClick={onExportReport}
-                  className={`hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                    isDark
-                      ? 'bg-slate-900 text-slate-300 border-slate-700 hover:bg-slate-800 hover:text-white'
-                      : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
-                  }`}
+                  className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold bg-[#121624] hover:bg-[#1A2033] text-slate-200 border border-[#232B3E] transition-all"
                 >
                   <FileDown className="w-3.5 h-3.5" />
                   <span>Export Report</span>
@@ -157,7 +159,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
               <button
                 onClick={onAnalyzeBlueprint || (() => onNavigate('/projects/new'))}
-                className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm transition-all active:scale-95"
+                className="flex items-center gap-2 px-5 py-2 rounded-full bg-white hover:bg-slate-100 text-black text-xs font-bold shadow-md transition-all active:scale-95 cursor-pointer"
               >
                 <FileUp className="w-3.5 h-3.5" />
                 <span>Analyze Blueprint</span>
@@ -166,43 +168,45 @@ export const Navbar: React.FC<NavbarProps> = ({
           ) : currentRoute.startsWith('/projects') ? (
             <button
               onClick={() => onNavigate('/projects/new')}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm transition-all active:scale-95"
+              className="flex items-center gap-2 px-5 py-2 rounded-full bg-white hover:bg-slate-100 text-black text-xs font-bold shadow-md transition-all active:scale-95 cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>New Project</span>
             </button>
           ) : (
-            <button
-              onClick={() => onNavigate('/projects/new')}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm transition-all active:scale-95"
-            >
-              <span>Analyze Your Blueprint</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => onNavigate('/how-it-works/demo')}
+                className="hidden sm:flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors px-3 py-1.5"
+              >
+                <span>Demo</span>
+              </button>
+              <button
+                onClick={() => onNavigate('/projects/new')}
+                className="flex items-center gap-2 px-5 py-2 rounded-full bg-white hover:bg-slate-100 text-black text-xs font-bold shadow-md transition-all active:scale-95 cursor-pointer"
+              >
+                <span>Analyze Blueprint</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Sub-Navigation Bar for Project Workspace (Screen 7 & 8) */}
+      {/* JetBrains-Style Workspace Tab Bar (When inside Project Workspace) */}
       {isWorkspace && (
-        <div
-          className={`border-t px-6 overflow-x-auto ${
-            isDark ? 'border-slate-800/80 bg-[#0B0F17]' : 'border-slate-200 bg-white'
-          }`}
-        >
-          <div className="max-w-7xl mx-auto flex items-center gap-1 sm:gap-2">
+        <div className="border-t border-[#161B26] px-6 overflow-x-auto bg-[#05070B]">
+          <div className="max-w-7xl mx-auto flex items-center gap-1">
             {workspaceTabs.map((tab) => {
               const isActive = activeWorkspaceTab === tab.id
               return (
                 <button
                   key={tab.id}
                   onClick={() => onWorkspaceTabChange && onWorkspaceTabChange(tab.id)}
-                  className={`py-2.5 px-3 text-xs font-medium border-b-2 whitespace-nowrap transition-colors ${
+                  className={`py-2.5 px-3.5 text-xs font-medium border-b-2 whitespace-nowrap transition-colors ${
                     isActive
-                      ? 'border-indigo-600 text-indigo-600 font-semibold'
-                      : isDark
-                      ? 'border-transparent text-slate-400 hover:text-slate-200'
-                      : 'border-transparent text-slate-500 hover:text-slate-800'
+                      ? 'border-[#6B57FF] text-white font-bold bg-[#0F131F]'
+                      : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-[#0A0D15]'
                   }`}
                 >
                   {tab.label}

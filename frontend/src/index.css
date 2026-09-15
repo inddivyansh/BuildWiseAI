@@ -4,10 +4,13 @@
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-display: 'Outfit', 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+  color-scheme: dark;
 }
 
 body {
   font-family: var(--font-sans);
+  background-color: #000000;
+  color: #F8FAFC;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -15,35 +18,27 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
 }
 
 code, pre {
   font-family: var(--font-mono);
 }
 
-/* Custom Scrollbars */
+/* JetBrains Dark Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #07090E;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #202636;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-/* Dark mode scrollbars */
-.dark ::-webkit-scrollbar-thumb {
-  background: #334155;
-}
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #333D56;
 }
 
 /* Animation utilities */
@@ -64,4 +59,19 @@ code, pre {
 
 .violation-highlight {
   animation: violation-pulse 2s infinite ease-in-out;
+}
+
+/* JetBrains gradient border utility */
+.jb-gradient-border {
+  position: relative;
+  background: #090B12;
+  border-radius: 1rem;
+}
+.jb-gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 1.05rem;
+  background: linear-gradient(135deg, rgba(254, 40, 87, 0.4), rgba(107, 87, 255, 0.4), rgba(0, 240, 255, 0.2));
+  z-index: -1;
 }
