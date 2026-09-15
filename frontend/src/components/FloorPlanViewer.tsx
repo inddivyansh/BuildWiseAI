@@ -285,21 +285,22 @@ export const FloorPlanViewer: React.FC<FloorPlanViewerProps> = ({
           {showOpenings &&
             currentFloor.openings.map((op) => {
               const isDoor = op.opening_type.includes('door')
+              const opWidth = op.width_m ?? 0.85
               return (
                 <g key={op.id}>
                   <circle
                     cx={op.position.x}
                     cy={op.position.y}
-                    r={op.width_m / 2 || 0.4}
+                    r={opWidth / 2}
                     fill={isDoor ? 'rgba(56, 189, 248, 0.2)' : 'rgba(16, 185, 129, 0.2)'}
                     stroke={isDoor ? '#38bdf8' : '#34d399'}
                     strokeWidth="0.04"
                     strokeDasharray={isDoor ? '0.1 0.05' : 'none'}
                   />
                   <line
-                    x1={op.position.x - op.width_m / 2}
+                    x1={op.position.x - opWidth / 2}
                     y1={op.position.y}
-                    x2={op.position.x + op.width_m / 2}
+                    x2={op.position.x + opWidth / 2}
                     y2={op.position.y}
                     stroke={isDoor ? '#38bdf8' : '#34d399'}
                     strokeWidth="0.06"
@@ -307,6 +308,80 @@ export const FloorPlanViewer: React.FC<FloorPlanViewerProps> = ({
                 </g>
               )
             })}
+
+          {/* Stairs Layer */}
+          {currentFloor.stairs?.map((stair) => {
+            const hasBoundary = !!(stair.boundary && stair.boundary.vertices.length >= 3)
+            const pointsStr = hasBoundary
+              ? stair.boundary!.vertices.map((v) => `${v.x},${v.y}`).join(' ')
+              : ''
+            const cx = hasBoundary
+              ? stair.boundary!.vertices.reduce((acc, v) => acc + v.x, 0) / stair.boundary!.vertices.length
+              : stair.position?.x ?? 0
+            const cy = hasBoundary
+              ? stair.boundary!.vertices.reduce((acc, v) => acc + v.y, 0) / stair.boundary!.vertices.length
+              : stair.position?.y ?? 0
+
+            return (
+              <g key={stair.id}>
+                {hasBoundary ? (
+                  <polygon
+                    points={pointsStr}
+                    fill="rgba(244, 63, 94, 0.15)"
+                    stroke="#f43f5e"
+                    strokeWidth="0.05"
+                    strokeDasharray="0.1 0.05"
+                  />
+                ) : (
+                  <rect
+                    x={cx - 0.75}
+                    y={cy - 0.75}
+                    width="1.5"
+                    height="1.5"
+                    fill="rgba(244, 63, 94, 0.15)"
+                    stroke="#f43f5e"
+                    strokeWidth="0.05"
+                  />
+                )}
+                <text
+                  x={cx}
+                  y={cy}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fill="#f43f5e"
+                  fontSize="0.22"
+                  fontWeight="600"
+                >
+                  STAIR
+                </text>
+              </g>
+            )
+          })}
+
+          {/* Exits Layer */}
+          {currentFloor.exits?.map((exit_) => (
+            <g key={exit_.id}>
+              <circle
+                cx={exit_.position.x}
+                cy={exit_.position.y}
+                r={0.45}
+                fill="rgba(16, 185, 129, 0.25)"
+                stroke="#10b981"
+                strokeWidth="0.06"
+              />
+              <text
+                x={exit_.position.x}
+                y={exit_.position.y}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fill="#10b981"
+                fontSize="0.20"
+                fontWeight="700"
+              >
+                EXIT
+              </text>
+            </g>
+          ))}
 
           {/* Violation Overlays Layer */}
           {showViolations &&

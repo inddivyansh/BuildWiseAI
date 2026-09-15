@@ -23,6 +23,8 @@ import uuid
 from dataclasses import dataclass, field
 from typing import Any, Optional
 
+from shapely.geometry import Point
+
 from app.logging_config import get_logger
 from engines.geometry.models import (
     CanonicalFloorPlan,
@@ -239,119 +241,106 @@ class FloorPlanGraphBuilder:
                 if n.floor_level == floor.level and n.node_type in ("room", "corridor")
             ]
 
+        # ─── Geometric room adjacency & opening mapping ───
+        for floor in cgm.floors:
+            room_objs = [r for r in floor.rooms]
+            room_polys = {str(r.id): r.to_shapely() for r in room_objs}
+
+            # 1. Direct opening to room connections
             for opening in floor.openings:
-                # Find the two closest rooms to this opening
-                ox, oy = opening.position.x, opening.position.y
-                candidates = sorted(
-                    room_nodes,
-                    key=lambda n: _distance(n.centroid_x, n.centroid_y, ox, oy),
-                )
-                if len(candidates) >= 2:
-                    a, b = candidates[0], candidates[1]
-                    dist = _distance(a.centroid_x, a.centroid_y, b.centroid_x, b.centroid_y)
-                    if dist < self.OPENING_MATCH_RADIUS_M * 2:
-                        edge_type = (
-                            "door" if opening.opening_type == OpeningType.DOOR else "passage"
-                        )
-                        if not graph.has_edge(a.id, b.id):
-                            graph.add_edge(a.id, b.id, type=edge_type, width_m=opening.width_m)
-                            edge = GraphEdge(
-                                source_id=a.id,
-                                target_id=b.id,
+                opt = Point(opening.position.x, opening.position.y)
+                # Find rooms within 1.5m of opening
+                touching_rooms = []
+                for rid, poly in room_polys.items():
+                    if poly.distance(opt) <= 1.5:
+                        touching_rooms.append(rid)
+
+                if len(touching_rooms) >= 2:
+                    r1, r2 = touching_rooms[0], touching_rooms[1]
+                    dist = _distance(node_map[r1].centroid_x, node_map[r1].centroid_y, node_map[r2].centroid_x, node_map[r2].centroid_y)
+                    edge_type = "door" if opening.opening_type == OpeningType.DOOR else "passage"
+                    if not graph.has_edge(r1, r2):
+                        graph.add_edge(r1, r2, type=edge_type, width_m=opening.width_m, weight=dist)
+                        graph_data.edges.append(
+                            GraphEdge(
+                                source_id=r1,
+                                target_id=r2,
                                 edge_type=edge_type,
                                 width_m=opening.width_m,
                                 floor_levels=[floor.level],
                                 distance_m=dist,
                             )
-                            graph_data.edges.append(edge)
+                        )
+                        edges_added += 1
+
+            # 2. Geometric Room Adjacency: check shared boundaries
+            for i, r1 in enumerate(room_objs):
+                p1 = room_polys[str(r1.id)]
+                for r2 in room_objs[i + 1:]:
+                    p2 = room_polys[str(r2.id)]
+                    rid1, rid2 = str(r1.id), str(r2.id)
+                    # Check if polygons touch or are within wall thickness (0.35m)
+                    if p1.distance(p2) <= 0.35:
+                        dist = _distance(node_map[rid1].centroid_x, node_map[rid1].centroid_y, node_map[rid2].centroid_x, node_map[rid2].centroid_y)
+                        is_corridor = r1.room_type == RoomType.CORRIDOR or r2.room_type == RoomType.CORRIDOR
+                        edge_type = "corridor_passage" if is_corridor else "shared_wall"
+
+                        if not graph.has_edge(rid1, rid2):
+                            graph.add_edge(rid1, rid2, type=edge_type, width_m=None, weight=dist)
+                            graph_data.edges.append(
+                                GraphEdge(
+                                    source_id=rid1,
+                                    target_id=rid2,
+                                    edge_type=edge_type,
+                                    width_m=None,
+                                    floor_levels=[floor.level],
+                                    distance_m=dist,
+                                )
+                            )
                             edges_added += 1
 
-            # ─── Fallback: proximity-based edges ──────────
-            if edges_added < self.MIN_EXPLICIT_EDGES and len(room_nodes) > 1:
-                logger.info(
-                    "No explicit openings detected — using proximity-based room connectivity",
-                    floor_level=floor.level,
-                )
-                for i, a in enumerate(room_nodes):
-                    for b in room_nodes[i + 1:]:
-                        dist = _distance(a.centroid_x, a.centroid_y, b.centroid_x, b.centroid_y)
-                        if dist < self.PROXIMITY_EDGE_THRESHOLD_M and not graph.has_edge(a.id, b.id):
-                            graph.add_edge(a.id, b.id, type="inferred", width_m=None)
-                            edge = GraphEdge(
-                                source_id=a.id,
-                                target_id=b.id,
-                                edge_type="inferred",
-                                width_m=None,
+            # 3. Connect exits to nearest adjacent room or corridor
+            for exit_ in floor.exits:
+                ept = Point(exit_.position.x, exit_.position.y)
+                eid = str(exit_.id)
+                # Find closest room
+                if room_objs:
+                    best_room = min(room_objs, key=lambda r: room_polys[str(r.id)].distance(ept))
+                    brid = str(best_room.id)
+                    dist = _distance(node_map[brid].centroid_x, node_map[brid].centroid_y, exit_.position.x, exit_.position.y)
+                    if not graph.has_edge(brid, eid):
+                        graph.add_edge(brid, eid, type="exit_reach", width_m=exit_.width_m, weight=dist)
+                        graph_data.edges.append(
+                            GraphEdge(
+                                source_id=brid,
+                                target_id=eid,
+                                edge_type="exit_reach",
+                                width_m=exit_.width_m,
                                 floor_levels=[floor.level],
                                 distance_m=dist,
                             )
-                            graph_data.edges.append(edge)
-
-            # ─── Connect exits to nearest rooms ───────────
-            exit_nodes = [
-                n for n in graph_data.nodes
-                if n.floor_level == floor.level and n.node_type == "exit"
-            ]
-            for exit_node in exit_nodes:
-                if room_nodes:
-                    nearest = min(
-                        room_nodes,
-                        key=lambda n: _distance(n.centroid_x, n.centroid_y, exit_node.centroid_x, exit_node.centroid_y),
-                    )
-                    dist = _distance(nearest.centroid_x, nearest.centroid_y, exit_node.centroid_x, exit_node.centroid_y)
-                    if not graph.has_edge(nearest.id, exit_node.id):
-                        graph.add_edge(nearest.id, exit_node.id, type="exit_connection")
-                        graph_data.edges.append(GraphEdge(
-                            source_id=nearest.id,
-                            target_id=exit_node.id,
-                            edge_type="exit_connection",
-                            width_m=None,
-                            floor_levels=[floor.level],
-                            distance_m=dist,
-                        ))
-
-            # ─── Connect stairs to nearest rooms ──────────
-            stair_nodes = [
-                n for n in graph_data.nodes
-                if n.floor_level == floor.level and n.node_type == "stair"
-            ]
-            for stair_node in stair_nodes:
-                nearby = [
-                    n for n in room_nodes
-                    if _distance(n.centroid_x, n.centroid_y, stair_node.centroid_x, stair_node.centroid_y) < self.PROXIMITY_EDGE_THRESHOLD_M
-                ]
-                for room_node in nearby[:3]:  # Connect to max 3 adjacent rooms
-                    dist = _distance(room_node.centroid_x, room_node.centroid_y, stair_node.centroid_x, stair_node.centroid_y)
-                    if not graph.has_edge(room_node.id, stair_node.id):
-                        graph.add_edge(room_node.id, stair_node.id, type="stair")
-                        graph_data.edges.append(GraphEdge(
-                            source_id=room_node.id,
-                            target_id=stair_node.id,
-                            edge_type="stair",
-                            width_m=None,
-                            floor_levels=[floor.level],
-                            distance_m=dist,
-                        ))
+                        )
 
         # ─── Graph analysis ────────────────────────────────
         if graph.number_of_nodes() > 0:
             components = list(nx.connected_components(graph))
             graph_data.connected_components = len(components)
-            graph_data.is_fully_connected = len(components) == 1
+            graph_data.is_fully_connected = len(components) <= 1
 
-            # Exit reachability: which rooms cannot reach any exit?
             exit_ids = {n.id for n in graph_data.nodes if n.node_type == "exit"}
-            room_ids = {n.id for n in graph_data.nodes if n.node_type == "room"}
+            room_ids = {n.id for n in graph_data.nodes if n.node_type in ("room", "corridor")}
             graph_data.exit_count = len(exit_ids)
 
             rooms_without_access = []
             for room_id in room_ids:
-                if not any(
-                    nx.has_path(graph, room_id, eid)
-                    for eid in exit_ids
-                    if eid in graph
-                ):
+                has_exit = False
+                for eid in exit_ids:
+                    if eid in graph and nx.has_path(graph, room_id, eid):
+                        has_exit = True
+                        break
+                if not has_exit:
                     rooms_without_access.append(room_id)
+
             graph_data.rooms_without_exit_access = rooms_without_access
 
         logger.info(

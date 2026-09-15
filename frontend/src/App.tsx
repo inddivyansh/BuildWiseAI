@@ -386,18 +386,40 @@ export const App: React.FC = () => {
     return () => clearInterval(timer)
   }, [])
 
+  // Live analysis state
+  const [analysisProgress, setAnalysisProgress] = useState<{
+    status: string
+    stage: string
+    progress_pct: number
+    error_message?: string
+  } | null>(null)
+
   // Poll analysis run if one was started
   const handleAnalysisStarted = (runId: string) => {
     setCurrentRunId(runId)
     setActiveTab('studio')
+    setAnalysisProgress({
+      status: 'processing',
+      stage: 'validating',
+      progress_pct: 5,
+    })
 
     // Poll until completion
     const pollInterval = setInterval(async () => {
       try {
         const st = await apiClient.getAnalysisStatus(runId)
+        setAnalysisProgress({
+          status: st.status,
+          stage: st.stage,
+          progress_pct: st.progress_pct,
+          error_message: st.error_message,
+        })
+
         if (st.status === 'complete') {
           clearInterval(pollInterval)
-          // Fetch real data
+          setTimeout(() => setAnalysisProgress(null), 3000)
+
+          // Fetch real backend data
           const fp = await apiClient.getFloorPlan(runId)
           const viols = await apiClient.getViolations(runId)
           const comp = await apiClient.getComplianceResults(runId)
@@ -408,6 +430,9 @@ export const App: React.FC = () => {
           setComplianceResults(comp.results)
           setComplianceSummary(comp.summary)
           setGraphData(graph)
+          if (viols.violations.length > 0) {
+            setSelectedViolation(viols.violations[0])
+          }
         } else if (st.status === 'failed') {
           clearInterval(pollInterval)
         }
@@ -426,6 +451,37 @@ export const App: React.FC = () => {
         onOpenUpload={() => setIsUploadOpen(true)}
         readiness={readiness}
       />
+
+      {/* Live Pipeline Processing Banner */}
+      {analysisProgress && (
+        <div className="bg-slate-900/95 border-b border-indigo-500/30 px-6 py-3 transition-all">
+          <div className="max-w-7xl mx-auto flex flex-col gap-1.5">
+            <div className="flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2 font-medium text-slate-200">
+                {analysisProgress.status === 'failed' ? (
+                  <AlertTriangle className="w-4 h-4 text-rose-400" />
+                ) : (
+                  <Sparkles className="w-4 h-4 text-indigo-400 animate-spin" />
+                )}
+                <span>
+                  {analysisProgress.status === 'failed'
+                    ? `Analysis Failed: ${analysisProgress.error_message || 'Processing error'}`
+                    : `Pipeline Active — Stage: ${analysisProgress.stage?.toUpperCase() || 'PROCESSING'}`}
+                </span>
+              </div>
+              <span className="font-mono text-indigo-300 font-semibold">{analysisProgress.progress_pct}%</span>
+            </div>
+            <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+              <div
+                className={`h-full transition-all duration-300 ${
+                  analysisProgress.status === 'failed' ? 'bg-rose-500' : 'bg-gradient-to-r from-indigo-500 to-cyan-400'
+                }`}
+                style={{ width: `${Math.max(analysisProgress.progress_pct, 5)}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Workspace Area */}
       <main className="flex-1 p-6 flex flex-col">

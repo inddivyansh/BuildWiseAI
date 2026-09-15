@@ -13,7 +13,7 @@ from app.database import get_db_session
 from app.logging_config import get_logger
 from app.models.document import UploadedDocument
 from app.models.project import Project
-from app.schemas.document import DocumentResponse, DocumentListResponse
+from app.schemas.document import DocumentDetectionResponse, DocumentListResponse, DocumentResponse
 from app.storage.local import LocalStorage
 
 router = APIRouter()
@@ -149,6 +149,10 @@ async def upload_document(
     await db.flush()
     await db.refresh(document)
 
+    # Detect document type
+    from engines.ingestion.detector import DocumentDetector
+    detection = DocumentDetector.detect(content, file.filename)
+
     logger.info(
         "Document uploaded",
         document_id=str(doc_id),
@@ -156,9 +160,42 @@ async def upload_document(
         filename=file.filename,
         size_bytes=len(content),
         format=ext,
+        detected_type=detection.doc_type.value,
     )
 
-    return document
+    doc_response = DocumentResponse(
+        id=document.id,
+        project_id=document.project_id,
+        original_name=document.original_name,
+        storage_key=document.storage_key,
+        file_format=document.file_format,
+        mime_type=document.mime_type,
+        file_size_bytes=document.file_size_bytes,
+        checksum_sha256=document.checksum_sha256,
+        uploaded_at=document.uploaded_at,
+        detection_info=DocumentDetectionResponse(**detection.to_dict()),
+    )
+    return doc_response
+
+
+@router.post(
+    "/detect",
+    response_model=DocumentDetectionResponse,
+    summary="Detect document type and vector content without saving",
+)
+async def detect_document(
+    file: UploadFile = File(...),
+):
+    """
+    Fast pre-upload detection probe:
+    Distinguishes DXF, Vector PDF, Raster PDF, and Images.
+    """
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="Filename is required")
+    content = await file.read()
+    from engines.ingestion.detector import DocumentDetector
+    detection = DocumentDetector.detect(content, file.filename)
+    return DocumentDetectionResponse(**detection.to_dict())
 
 
 @router.get("/{document_id}", response_model=DocumentResponse, summary="Get document metadata")

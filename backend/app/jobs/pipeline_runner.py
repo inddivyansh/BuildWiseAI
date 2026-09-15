@@ -99,16 +99,37 @@ class PipelineRunner:
             logger.info("File loaded", size=len(file_content), ext=ext)
 
             # ── Stage 2: Parse ─────────────────────────────
-            await self._update("processing", "parsing", 20, "Parsing floor plan geometry...")
+            await self._update("processing", "parsing", 20, "Detecting document type and parsing geometry...")
             from engines.ingestion.base import IngestionError
+            from engines.ingestion.detector import DocumentDetector, DocumentType
             from engines.ingestion.dxf.adapter import DXFAdapter
+            from engines.ingestion.pdf.adapter import PDFAdapter
+            from engines.ingestion.vision.adapter import VisionAdapter
 
-            if ext == ".dxf":
+            doc_info = DocumentDetector.detect(file_content, filename)
+            logger.info("Document type detected", doc_type=doc_info.doc_type.value, is_vector=doc_info.is_vector)
+
+            if doc_info.doc_type == DocumentType.DXF or ext == ".dxf":
                 adapter = DXFAdapter()
+                cgm = adapter.parse(file_content, filename)
+            elif doc_info.doc_type == DocumentType.VECTOR_PDF:
+                adapter = PDFAdapter()
+                cgm = adapter.parse(file_content, filename)
+            elif doc_info.doc_type == DocumentType.RASTER_PDF:
+                raise IngestionError(
+                    "Scanned / Raster PDF detected. This document contains bitmap scans rather than CAD vectors. "
+                    "Please upload a vector CAD PDF/DXF or export the plan as an image for the classical vision pipeline.",
+                    error_code="RASTER_PDF_REQUIRES_VISION",
+                )
+            elif doc_info.doc_type == DocumentType.IMAGE or ext in (".png", ".jpg", ".jpeg", ".bmp", ".webp"):
+                adapter = VisionAdapter()
+                cgm = adapter.parse(file_content, filename)
+            elif ext == ".pdf":
+                adapter = PDFAdapter()
                 cgm = adapter.parse(file_content, filename)
             else:
                 raise IngestionError(
-                    f"Unsupported format '{ext}'. DXF support active in Phase 1.",
+                    f"Unsupported format '{ext}'. Supported formats: DXF, Vector PDF, PNG, JPG.",
                     "UNSUPPORTED_FORMAT",
                 )
 

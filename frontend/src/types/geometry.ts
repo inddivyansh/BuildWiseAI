@@ -57,7 +57,7 @@ export interface CGMOpening {
   id: string
   opening_type: OpeningType
   position: Point2D
-  width_m: number
+  width_m?: number
   height_m?: number
   swing_angle_deg?: number
   swing_direction?: string
@@ -87,8 +87,9 @@ export interface CGMRoom {
 
 export interface CGMStair {
   id: string
-  position: Point2D
-  width_m: number
+  position?: Point2D
+  boundary?: Polygon2D
+  width_m?: number
   riser_count?: number
   tread_depth_m?: number
   riser_height_m?: number

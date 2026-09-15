@@ -12,6 +12,17 @@ export interface Project {
   updated_at: string
 }
 
+export interface DocumentDetection {
+  doc_type: 'dxf' | 'vector_pdf' | 'raster_pdf' | 'image' | 'unknown'
+  is_vector: boolean
+  mime_type: string
+  description: string
+  recommended_pipeline: string
+  page_count: number
+  confidence: number
+  details?: Record<string, any>
+}
+
 export interface UploadedDocument {
   id: string
   project_id: string
@@ -20,6 +31,7 @@ export interface UploadedDocument {
   mime_type: string
   storage_key: string
   created_at: string
+  detection_info?: DocumentDetection
 }
 
 export interface AnalysisRun {

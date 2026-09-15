@@ -44,6 +44,14 @@ export const apiClient = {
   },
 
   // Documents
+  detectDocument: async (file: File) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    const res = await api.post<import('../types/project').DocumentDetection>('/api/v1/documents/detect', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    return res.data
+  },
   uploadDocument: async (projectId: string, file: File) => {
     const formData = new FormData()
     formData.append('file', file)
