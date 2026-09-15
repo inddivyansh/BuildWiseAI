@@ -27,15 +27,17 @@ class MinStairWidthRule(ComplianceRule):
     )
     category = "egress"
     severity = Severity.CRITICAL
-    regulation_source = "NBC 2016"
-    part = "Part 4"
-    section = "Section 4.4.3"
+    volume = "Volume 1"
+    part = "Part 4 (Fire and Life Safety)"
+    clause = "Clause 4.4.2.4.3.2(e)"
+    source_page = 288
     parameter = "min_stair_width"
     unit = "m"
-    verification_status = RuleVerificationStatus.REQUIRES_VERIFICATION
+    verification_status = RuleVerificationStatus.VERIFIED
 
-    DEFAULT_MIN_RESIDENTIAL_STAIR = 1.00      # 1000 mm
-    DEFAULT_MIN_COMMERCIAL_STAIR = 1.50       # 1500 mm
+    DEFAULT_MIN_RESIDENTIAL_STAIR = 1.00      # 1000 mm (Residential A-2)
+    DEFAULT_MIN_COMMERCIAL_STAIR = 1.50       # 1500 mm (Commercial / Business / Educational)
+    DEFAULT_MIN_ASSEMBLY_STAIR = 2.00         # 2000 mm (Assembly / Institutional)
 
     def evaluate(
         self,
@@ -44,11 +46,12 @@ class MinStairWidthRule(ComplianceRule):
         context: Optional[dict[str, Any]] = None,
     ) -> list[ComplianceResultData]:
         occupancy = (context or {}).get("occupancy_type", "residential").lower()
-        required_width = (
-            self.DEFAULT_MIN_COMMERCIAL_STAIR
-            if occupancy in ("commercial", "assembly", "educational", "institutional")
-            else self.DEFAULT_MIN_RESIDENTIAL_STAIR
-        )
+        if occupancy in ("assembly", "institutional"):
+            required_width = self.DEFAULT_MIN_ASSEMBLY_STAIR
+        elif occupancy in ("commercial", "educational", "business"):
+            required_width = self.DEFAULT_MIN_COMMERCIAL_STAIR
+        else:
+            required_width = self.DEFAULT_MIN_RESIDENTIAL_STAIR
 
         results: list[ComplianceResultData] = []
         stairs_checked = 0

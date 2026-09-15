@@ -73,6 +73,8 @@ class ComplianceEngine:
         for rule in self.rules:
             try:
                 rule_results = rule.evaluate(cgm=cgm, graph=graph, context=context)
+                for res in rule_results:
+                    rule.populate_statutory_evidence(res)
                 all_results.extend(rule_results)
             except Exception as e:
                 logger.error(
@@ -81,16 +83,16 @@ class ComplianceEngine:
                     error=str(e),
                     exc_info=True,
                 )
-                all_results.append(
-                    ComplianceResultData(
-                        rule_id=rule.rule_id,
-                        status=ResultStatus.INSUFFICIENT_DATA,
-                        severity=rule.severity,
-                        title=f"{rule.title} (Evaluation Error)",
-                        description=f"Rule could not be evaluated due to unexpected error: {str(e)}",
-                        confidence="low",
-                    )
+                err_res = ComplianceResultData(
+                    rule_id=rule.rule_id,
+                    status=ResultStatus.INSUFFICIENT_DATA,
+                    severity=rule.severity,
+                    title=f"{rule.title} (Evaluation Error)",
+                    description=f"Rule could not be evaluated due to unexpected error: {str(e)}",
+                    confidence="low",
                 )
+                rule.populate_statutory_evidence(err_res)
+                all_results.append(err_res)
 
         summary = self._compute_summary(all_results)
         logger.info(

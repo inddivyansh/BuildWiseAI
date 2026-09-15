@@ -29,15 +29,17 @@ class MaxTravelDistanceRule(ComplianceRule):
     category = "egress"
     severity = Severity.CRITICAL
     regulation_source = "NBC 2016"
-    part = "Part 4"
-    section = "Section 4.4"
+    volume = "Volume 1"
+    part = "Part 4 (Fire and Life Safety)"
+    clause = "Clause 4.4.2.2 & Table 5"
+    source_page = 287
     parameter = "max_travel_distance"
     unit = "m"
-    verification_status = RuleVerificationStatus.REQUIRES_VERIFICATION
+    verification_status = RuleVerificationStatus.VERIFIED
 
-    # NBC 2016 Part 4 Table 5 typical thresholds:
-    DEFAULT_MAX_DISTANCE_NON_SPRINKLERED = 30.0    # 30 meters
-    DEFAULT_MAX_DISTANCE_SPRINKLERED = 45.0        # 45 meters
+    # NBC 2016 Part 4 Table 5 verified thresholds:
+    DEFAULT_MAX_DISTANCE_NON_SPRINKLERED = 30.0    # 30 meters (Type 1 & 2 construction)
+    DEFAULT_MAX_DISTANCE_SPRINKLERED = 45.0        # 45 meters (+50% increase for full sprinkler)
 
     def evaluate(
         self,

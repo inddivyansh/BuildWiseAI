@@ -371,6 +371,10 @@ class PipelineRunner:
         report_data = {
             "analysis_run_id": self.run_id_str,
             "generated_at": datetime.now(UTC).isoformat(),
+            "disclaimer": (
+                "BuildWise AI provides automated preliminary compliance screening and does not "
+                "replace review by a qualified architect, engineer, or competent authority."
+            ),
             "summary": compliance_output.summary.to_dict(),
             "compliance_results": [r.to_dict() for r in compliance_output.results],
             "building_metadata": {

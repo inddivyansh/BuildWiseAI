@@ -52,6 +52,8 @@ frontend/coverage/
 # ─── Storage (uploaded files, generated reports) ──────────
 backend/storage/
 storage/
+scratch/
+backend/scratch/
 *.pdf
 !data/regulations/*.pdf
 !tests/fixtures/**/*.pdf

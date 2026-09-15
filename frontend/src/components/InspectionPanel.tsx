@@ -98,7 +98,26 @@ export const InspectionPanel: React.FC<InspectionPanelProps> = ({
           <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-1">
             <BookOpen className="w-3.5 h-3.5 text-cyan-400" />
             <span>Regulation Source:</span>
-            <span className="text-slate-200 font-medium">{violation.regulation_source}</span>
+            <span className="text-slate-200 font-medium">{violation.statutory_volume || violation.regulation_source}</span>
+          </div>
+
+          {/* Statutory Provenance */}
+          <div className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800 text-[11px] flex flex-col gap-1 mt-1">
+            <div className="flex justify-between items-center text-slate-400">
+              <span>Clause:</span>
+              <strong className="text-cyan-300 font-mono">{violation.statutory_clause || 'Part 4 Egress'}</strong>
+            </div>
+            {violation.source_page && (
+              <div className="flex justify-between items-center text-slate-400">
+                <span>Source PDF Page:</span>
+                <span className="text-slate-200 font-mono">Page {violation.source_page}</span>
+              </div>
+            )}
+            {violation.verbatim_statutory_text && (
+              <div className="mt-1 pt-1.5 border-t border-slate-800 text-[10px] text-slate-300 italic">
+                "{violation.verbatim_statutory_text}"
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -131,20 +150,25 @@ export const InspectionPanel: React.FC<InspectionPanelProps> = ({
         <div className="bg-indigo-950/30 border border-indigo-500/30 rounded-xl p-3.5 text-xs">
           <div className="flex items-center gap-1.5 text-indigo-400 font-semibold mb-1">
             <ArrowRight className="w-3.5 h-3.5" />
-            <span>Corrective Recommendation</span>
+            <span>Deterministic Corrective Action</span>
           </div>
           <p className="text-slate-300 leading-relaxed">{violation.recommendation}</p>
         </div>
       )}
 
-      {/* AI Plain-Language Explanation (Gemini) */}
+      {/* AI Plain-Language Explanation (Gemini) — Clearly Separated */}
       {violation?.llm_explanation && (
         <div className="bg-slate-900/95 border border-cyan-500/30 rounded-xl p-3.5 text-xs relative overflow-hidden">
           <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-xl pointer-events-none" />
 
-          <div className="flex items-center gap-1.5 text-cyan-400 font-semibold mb-1.5">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>AI Code Interpretation (Gemini)</span>
+          <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center gap-1.5 text-cyan-400 font-semibold">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>AI Interpretive Summary (Non-Statutory)</span>
+            </div>
+            <span className="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded border border-slate-700">
+              Gemini RAG
+            </span>
           </div>
 
           <p className="text-slate-300 leading-relaxed whitespace-pre-line text-[11px]">

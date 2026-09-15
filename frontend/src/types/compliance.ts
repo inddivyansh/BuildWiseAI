@@ -32,6 +32,13 @@ export interface Violation {
   required_value?: number
   unit?: string
   regulation_source?: string
+  verification_status?: string
+  source_filename?: string
+  source_sha256?: string
+  statutory_clause?: string
+  statutory_volume?: string
+  source_page?: number
+  verbatim_statutory_text?: string
   recommendation?: string
   llm_explanation?: string
 }
@@ -47,6 +54,13 @@ export interface ComplianceResult {
   required_value?: number
   unit?: string
   regulation_source?: string
+  verification_status?: string
+  source_filename?: string
+  source_sha256?: string
+  statutory_clause?: string
+  statutory_volume?: string
+  source_page?: number
+  verbatim_statutory_text?: string
   confidence: string
   recommendation?: string
   llm_explanation?: string

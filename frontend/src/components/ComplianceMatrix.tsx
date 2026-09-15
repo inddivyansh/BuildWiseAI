@@ -199,24 +199,54 @@ export const ComplianceMatrix: React.FC<ComplianceMatrixProps> = ({
                     <span className="font-mono text-xs font-bold text-slate-300">
                       {result.rule_id}
                     </span>
-                    <span
-                      className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
-                        isPass
-                          ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                          : isCrit
-                          ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-                          : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                      }`}
-                    >
-                      {result.status}
-                    </span>
+                    {result.status === 'UNVERIFIED' ? (
+                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                        REQUIRES VERIFICATION
+                      </span>
+                    ) : (
+                      <span
+                        className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
+                          isPass
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                            : isCrit
+                            ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                            : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                        }`}
+                      >
+                        {result.status}
+                      </span>
+                    )}
                     <span className="text-[10px] uppercase font-bold text-slate-400">
                       • {result.severity}
                     </span>
+                    {result.verification_status === 'VERIFIED' && (
+                      <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                        NBC VERIFIED
+                      </span>
+                    )}
                   </div>
 
                   <h4 className="text-sm font-semibold text-white mt-1">{result.title}</h4>
                   <p className="text-xs text-slate-400 mt-0.5">{result.description}</p>
+
+                  {/* Grounded Clause and Page */}
+                  <div className="flex items-center gap-3 mt-1 text-[11px] text-slate-400 flex-wrap">
+                    <span>
+                      <strong className="text-slate-300">Clause:</strong>{' '}
+                      {result.statutory_clause || 'Part 4'}
+                    </span>
+                    {result.source_page && (
+                      <span>
+                        <strong className="text-slate-300">Page:</strong> {result.source_page}
+                      </span>
+                    )}
+                    <span>
+                      <strong className="text-slate-300">Confidence:</strong>{' '}
+                      <span className={result.confidence === 'high' ? 'text-emerald-400' : 'text-amber-400'}>
+                        {result.confidence.toUpperCase()}
+                      </span>
+                    </span>
+                  </div>
 
                   {result.recommendation && (
                     <p className="text-xs text-indigo-300/90 mt-1.5 bg-indigo-950/20 p-2 rounded-lg border border-indigo-500/20">
@@ -236,12 +266,12 @@ export const ComplianceMatrix: React.FC<ComplianceMatrixProps> = ({
                     {result.measured_value !== undefined ? result.measured_value.toFixed(2) : '—'}{' '}
                     {result.unit} /{' '}
                     <span className="text-slate-400">
-                      {result.required_value !== undefined ? result.required_value.toFixed(2) : '—'}{' '}
+                      {result.required_value !== undefined ? `≥ ${result.required_value.toFixed(2)}` : '—'}{' '}
                       {result.unit}
                     </span>
                   </div>
                   <span className="text-[10px] text-cyan-400 block mt-0.5">
-                    {result.regulation_source}
+                    {result.statutory_volume || result.regulation_source}
                   </span>
                 </div>
 

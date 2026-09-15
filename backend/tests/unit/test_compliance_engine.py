@@ -122,15 +122,21 @@ class TestComplianceRuleRegistry:
 class TestMinCorridorWidthRule:
     def test_detects_substandard_corridor_width(self, sample_floor_plan):
         rule = MinCorridorWidthRule()
+        # Verified rule properly evaluates substandard corridor to FAIL
+        assert rule.verification_status == RuleVerificationStatus.VERIFIED
         results = rule.evaluate(sample_floor_plan)
         assert len(results) == 1
         res = results[0]
-        # Because rule is REQUIRES_VERIFICATION, non-compliance produces UNVERIFIED (not premature FAIL)
-        assert res.status == ResultStatus.UNVERIFIED
+        assert res.status == ResultStatus.FAIL
         assert res.measured_value is not None
         assert res.measured_value < 1.0
         assert len(res.violations) == 1
         assert res.violations[0].entity_type == "corridor"
+
+        # Unverified rule behavior produces UNVERIFIED (never false statutory FAIL)
+        rule.verification_status = RuleVerificationStatus.REQUIRES_VERIFICATION
+        unverified_results = rule.evaluate(sample_floor_plan)
+        assert unverified_results[0].status == ResultStatus.UNVERIFIED
 
     def test_low_confidence_produces_insufficient_data(self, sample_floor_plan):
         # Set corridor confidence to LOW
@@ -143,6 +149,7 @@ class TestMinCorridorWidthRule:
 class TestMinRoomAreaRule:
     def test_evaluates_living_and_bedroom(self, sample_floor_plan):
         rule = MinRoomAreaRule()
+        assert rule.verification_status == RuleVerificationStatus.VERIFIED
         results = rule.evaluate(sample_floor_plan)
         assert len(results) == 2
 
@@ -151,16 +158,22 @@ class TestMinRoomAreaRule:
         assert living_res.status == ResultStatus.PASS
         assert living_res.measured_value == 16.0
 
-        # Substandard bedroom (6 m2 < 9.5 m2) should be flagged UNVERIFIED (since rule requires verification)
+        # Substandard bedroom (6 m2 < 9.5 m2) verified rule produces FAIL
         bed_res = next(r for r in results if "Bedroom" in r.title)
-        assert bed_res.status == ResultStatus.UNVERIFIED
+        assert bed_res.status == ResultStatus.FAIL
         assert bed_res.measured_value == 6.0
         assert len(bed_res.violations) == 1
+
+        # Unverified rule produces UNVERIFIED
+        rule.verification_status = RuleVerificationStatus.REQUIRES_VERIFICATION
+        unverified_bed = rule.evaluate(sample_floor_plan)
+        assert next(r for r in unverified_bed if "Bedroom" in r.title).status == ResultStatus.UNVERIFIED
 
 
 class TestMinDoorWidthRule:
     def test_evaluates_doors(self, sample_floor_plan):
         rule = MinDoorWidthRule()
+        assert rule.verification_status == RuleVerificationStatus.VERIFIED
         results = rule.evaluate(sample_floor_plan)
         assert len(results) == 2
 
@@ -168,10 +181,15 @@ class TestMinDoorWidthRule:
         pass_res = next(r for r in results if r.measured_value == 1.00)
         assert pass_res.status == ResultStatus.PASS
 
-        # Narrow 0.70m door
+        # Narrow 0.70m door produces FAIL when rule is VERIFIED
         narrow_res = next(r for r in results if r.measured_value == 0.70)
-        assert narrow_res.status == ResultStatus.UNVERIFIED
+        assert narrow_res.status == ResultStatus.FAIL
         assert len(narrow_res.violations) == 1
+
+        # Unverified rule produces UNVERIFIED
+        rule.verification_status = RuleVerificationStatus.REQUIRES_VERIFICATION
+        unverified_res = rule.evaluate(sample_floor_plan)
+        assert next(r for r in unverified_res if r.measured_value == 0.70).status == ResultStatus.UNVERIFIED
 
 
 class TestComplianceEngine:

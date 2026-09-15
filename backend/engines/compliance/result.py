@@ -79,6 +79,12 @@ class ComplianceResultData:
     llm_explanation: Optional[str] = None
     llm_model_used: Optional[str] = None
     floor_level: Optional[int] = None
+    verification_status: str = "VERIFIED"
+    source_filename: Optional[str] = None
+    source_sha256: Optional[str] = None
+    statutory_clause: Optional[str] = None
+    statutory_volume: Optional[str] = None
+    verbatim_statutory_text: Optional[str] = None
     violations: list[ViolationData] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
@@ -94,6 +100,12 @@ class ComplianceResultData:
             "regulation_source": self.regulation_source,
             "source_page": self.source_page,
             "source_section": self.source_section,
+            "verification_status": self.verification_status,
+            "source_filename": self.source_filename,
+            "source_sha256": self.source_sha256,
+            "statutory_clause": self.statutory_clause,
+            "statutory_volume": self.statutory_volume,
+            "verbatim_statutory_text": self.verbatim_statutory_text,
             "evidence": self.evidence or {},
             "confidence": self.confidence,
             "recommendation": self.recommendation,

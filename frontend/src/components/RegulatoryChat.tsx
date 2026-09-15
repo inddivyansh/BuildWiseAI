@@ -128,18 +128,27 @@ export const RegulatoryChat: React.FC = () => {
 
               {/* Grounded Statutory Citations */}
               {msg.citations && msg.citations.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-slate-800 flex flex-col gap-1.5">
+                <div className="mt-3 pt-3 border-t border-slate-800 flex flex-col gap-2">
                   <div className="flex items-center gap-1 text-[10px] font-semibold text-cyan-400 uppercase tracking-wider">
                     <Bookmark className="w-3 h-3" />
-                    <span>Statutory Citations:</span>
+                    <span>NBC 2016 Grounded Citations:</span>
                   </div>
                   {msg.citations.map((c, cIdx) => (
                     <div
                       key={cIdx}
-                      className="bg-slate-950/60 p-2 rounded-lg border border-slate-800 text-[11px] text-slate-300"
+                      className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800 text-[11px] text-slate-300 flex flex-col gap-1"
                     >
-                      <strong className="text-white">{c.section}</strong> (Page {c.page}):{' '}
-                      <em>"{c.text}"</em>
+                      <div className="flex items-center justify-between flex-wrap gap-2 text-[10px] pb-1 border-b border-slate-800/80">
+                        <span className="text-cyan-300 font-semibold font-mono">
+                          Clause: {c.section}
+                        </span>
+                        <span className="bg-slate-900 px-1.5 py-0.5 rounded text-slate-400 font-mono">
+                          Source Page: {c.page}
+                        </span>
+                      </div>
+                      <div className="text-[10px] text-slate-400 italic">
+                        "{c.text}"
+                      </div>
                     </div>
                   ))}
                 </div>

@@ -29,14 +29,18 @@ class MinCorridorWidthRule(ComplianceRule):
     category = "egress"
     severity = Severity.CRITICAL
     regulation_source = "NBC 2016"
-    part = "Part 4"
+    volume = "Volume 1"
+    part = "Part 4 (Fire and Life Safety) & Part 3"
+    clause = "Clause 4.4.2.4.2(a) & Part 3 Clause 13 / B-4.3"
+    source_page = 287
     parameter = "min_corridor_width"
     unit = "m"
-    verification_status = RuleVerificationStatus.REQUIRES_VERIFICATION
+    verification_status = RuleVerificationStatus.VERIFIED
 
-    # Threshold defaults (awaiting final clause citation from NBC Part 4 PDF)
+    # Statutory thresholds from NBC 2016 Part 4 Clause 4.4.2.4.2(a) & Part 3
     DEFAULT_MIN_WIDTH_RESIDENTIAL = 1.0     # 1000 mm for residential
-    DEFAULT_MIN_WIDTH_COMMERCIAL = 1.5      # 1500 mm for commercial / educational / assembly
+    DEFAULT_MIN_WIDTH_COMMERCIAL = 1.5      # 1500 mm unobstructed for commercial / office
+    DEFAULT_MIN_WIDTH_ASSEMBLY = 1.8        # 1800 mm preferred / assembly
 
     def evaluate(
         self,
@@ -45,11 +49,12 @@ class MinCorridorWidthRule(ComplianceRule):
         context: Optional[dict[str, Any]] = None,
     ) -> list[ComplianceResultData]:
         occupancy = (context or {}).get("occupancy_type", "residential").lower()
-        required_width = (
-            self.DEFAULT_MIN_WIDTH_COMMERCIAL
-            if occupancy in ("commercial", "assembly", "educational", "institutional")
-            else self.DEFAULT_MIN_WIDTH_RESIDENTIAL
-        )
+        if occupancy == "assembly":
+            required_width = self.DEFAULT_MIN_WIDTH_ASSEMBLY
+        elif occupancy in ("commercial", "educational", "institutional", "business", "mercantile"):
+            required_width = self.DEFAULT_MIN_WIDTH_COMMERCIAL
+        else:
+            required_width = self.DEFAULT_MIN_WIDTH_RESIDENTIAL
 
         results: list[ComplianceResultData] = []
         corridors_found = 0
@@ -64,8 +69,6 @@ class MinCorridorWidthRule(ComplianceRule):
                 if poly is None or poly.is_empty:
                     continue
 
-                # Corridor width estimation: minimum bounding rectangle minor dimension or area/perimeter ratio
-                # For long corridors, width ~= 2 * area / perimeter or min rotated rect width
                 rect = poly.minimum_rotated_rectangle
                 coords = list(rect.exterior.coords)
                 edge_lengths = [
@@ -73,6 +76,21 @@ class MinCorridorWidthRule(ComplianceRule):
                     for i in range(len(coords) - 1)
                 ]
                 measured_width = min(edge_lengths) if edge_lengths else 0.0
+
+                if measured_width <= 0.0:
+                    results.append(
+                        ComplianceResultData(
+                            rule_id=self.rule_id,
+                            status=ResultStatus.INSUFFICIENT_DATA,
+                            severity=self.severity,
+                            title=f"Corridor Width — ID {str(room.id)[:8]}",
+                            description="Corridor width could not be determined from geometry.",
+                            confidence=ConfidenceLevel.LOW.value,
+                            floor_level=floor.level,
+                            evidence={"room_id": str(room.id)},
+                        )
+                    )
+                    continue
 
                 is_compliant = measured_width >= required_width
                 status = self.resolve_status(is_compliant, room.confidence)

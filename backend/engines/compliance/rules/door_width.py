@@ -29,12 +29,17 @@ class MinDoorWidthRule(ComplianceRule):
     severity = Severity.MAJOR
     regulation_source = "NBC 2016"
     part = "Part 4"
+    volume = "Volume 1"
+    part = "Part 4 (Fire and Life Safety)"
+    clause = "Clause 4.4.2.4.1(b)"
+    source_page = 287
     parameter = "min_door_width"
     unit = "m"
-    verification_status = RuleVerificationStatus.REQUIRES_VERIFICATION
+    verification_status = RuleVerificationStatus.VERIFIED
 
-    DEFAULT_MIN_HABITABLE_DOOR = 0.90      # 900 mm clear width
-    DEFAULT_MIN_EXIT_DOOR = 1.00           # 1000 mm exit doorway
+    DEFAULT_MIN_HABITABLE_DOOR = 0.90      # 900 mm clear width (Part 3)
+    DEFAULT_MIN_EXIT_DOOR = 1.00           # 1000 mm exit doorway (Part 4 Clause 4.4.2.4.1(b))
+    DEFAULT_MIN_ASSEMBLY_DOOR = 2.00       # 2000 mm exit doorway for assembly (Part 4 Clause 4.4.2.4.1(b))
     DEFAULT_MIN_BATH_DOOR = 0.75           # 750 mm toilet / bath
 
     def evaluate(
@@ -45,6 +50,7 @@ class MinDoorWidthRule(ComplianceRule):
     ) -> list[ComplianceResultData]:
         results: list[ComplianceResultData] = []
         doors_checked = 0
+        occupancy = (context or {}).get("occupancy_type", "commercial").lower()
 
         for floor in cgm.floors:
             for opening in floor.openings:
@@ -59,13 +65,36 @@ class MinDoorWidthRule(ComplianceRule):
                 doors_checked += 1
                 measured_width = opening.width_m
 
-                # Required width based on door classification
+                # Required width based on door classification and occupancy
                 if opening.opening_type == OpeningType.EMERGENCY_EXIT:
-                    required_width = self.DEFAULT_MIN_EXIT_DOOR
-                    door_desc = "Emergency Exit Door"
+                    if occupancy == "assembly":
+                        required_width = self.DEFAULT_MIN_ASSEMBLY_DOOR
+                        door_desc = "Assembly Exit Door"
+                    else:
+                        required_width = self.DEFAULT_MIN_EXIT_DOOR
+                        door_desc = "Emergency Exit Door"
                 else:
                     required_width = self.DEFAULT_MIN_HABITABLE_DOOR
                     door_desc = "Standard Door"
+
+                if measured_width is None:
+                    results.append(
+                        ComplianceResultData(
+                            rule_id=self.rule_id,
+                            status=ResultStatus.INSUFFICIENT_DATA,
+                            severity=self.severity,
+                            title=f"{door_desc} Width — ID {str(opening.id)[:8]}",
+                            description="Door clear width is unknown / could not be measured from geometry.",
+                            confidence=ConfidenceLevel.LOW.value,
+                            floor_level=floor.level,
+                            evidence={
+                                "opening_id": str(opening.id),
+                                "opening_type": opening.opening_type.value,
+                                "measured_width_m": None,
+                            },
+                        )
+                    )
+                    continue
 
                 is_compliant = measured_width >= required_width
                 status = self.resolve_status(is_compliant, opening.confidence)

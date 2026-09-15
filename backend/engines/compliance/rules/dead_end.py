@@ -29,13 +29,17 @@ class MaxDeadEndCorridorRule(ComplianceRule):
     category = "egress"
     severity = Severity.CRITICAL
     regulation_source = "NBC 2016"
-    part = "Part 4"
-    section = "Section 4.4.2"
+    volume = "Volume 1"
+    part = "Part 4 (Fire and Life Safety)"
+    clause = "Clause 4.4.2.2(c)"
+    source_page = 285
     parameter = "max_dead_end_length"
     unit = "m"
-    verification_status = RuleVerificationStatus.REQUIRES_VERIFICATION
+    verification_status = RuleVerificationStatus.VERIFIED
 
-    DEFAULT_MAX_DEAD_END_M = 6.0       # 6.0 meters
+    # NBC 2016 Part 4 Clause 4.4.2.2(c) verified thresholds:
+    DEFAULT_MAX_DEAD_END_ASSEMBLY_M = 6.0       # 6.0 m for educational, institutional, assembly
+    DEFAULT_MAX_DEAD_END_OTHER_M = 15.0         # 15.0 m for other occupancies
 
     def evaluate(
         self,
@@ -44,7 +48,11 @@ class MaxDeadEndCorridorRule(ComplianceRule):
         context: Optional[dict[str, Any]] = None,
     ) -> list[ComplianceResultData]:
         results: list[ComplianceResultData] = []
-        max_allowed = self.DEFAULT_MAX_DEAD_END_M
+        occupancy = (context or {}).get("occupancy_type", "residential").lower()
+        if occupancy in ("educational", "institutional", "assembly"):
+            max_allowed = self.DEFAULT_MAX_DEAD_END_ASSEMBLY_M
+        else:
+            max_allowed = self.DEFAULT_MAX_DEAD_END_OTHER_M
 
         for floor in cgm.floors:
             corridor_count = 0

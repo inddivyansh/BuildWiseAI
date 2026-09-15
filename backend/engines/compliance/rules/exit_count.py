@@ -27,12 +27,13 @@ class MinExitCountRule(ComplianceRule):
     )
     category = "egress"
     severity = Severity.CRITICAL
-    regulation_source = "NBC 2016"
-    part = "Part 4"
-    section = "Section 4.2"
+    volume = "Volume 1"
+    part = "Part 4 (Fire and Life Safety)"
+    clause = "Clause 4.4.2.1 & 4.4.2.4.3.1"
+    source_page = 285
     parameter = "min_exit_count"
     unit = "count"
-    verification_status = RuleVerificationStatus.REQUIRES_VERIFICATION
+    verification_status = RuleVerificationStatus.VERIFIED
 
     AREA_THRESHOLD_FOR_DUAL_EXITS = 500.0   # 500 m²
 

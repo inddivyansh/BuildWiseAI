@@ -27,12 +27,13 @@ class MinRoomAreaRule(ComplianceRule):
     )
     category = "spatial"
     severity = Severity.MAJOR
-    regulation_source = "NBC 2016"
-    part = "Part 3"
-    clause = "Clause 12.2"
+    volume = "Volume 1"
+    part = "Part 3 (General Building Requirements)"
+    clause = "Clause 12.2.2, 12.3.2, 12.4.2"
+    source_page = 149
     parameter = "min_room_area"
     unit = "m2"
-    verification_status = RuleVerificationStatus.REQUIRES_VERIFICATION
+    verification_status = RuleVerificationStatus.VERIFIED
 
     # NBC 2016 Part 3 minimum floor area standards (m²):
     MIN_AREAS = {

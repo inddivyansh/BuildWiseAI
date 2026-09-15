@@ -27,12 +27,13 @@ class MinVentilationRatioRule(ComplianceRule):
     )
     category = "ventilation"
     severity = Severity.MINOR
-    regulation_source = "NBC 2016"
-    part = "Part 8"
-    section = "Section 1"
+    volume = "Volume 2"
+    part = "Part 8 (Building Services), Section 1 (Lighting and Natural Ventilation)"
+    clause = "Clause 4.4.4"
+    source_page = 116
     parameter = "min_ventilation_ratio"
     unit = "ratio"
-    verification_status = RuleVerificationStatus.REQUIRES_VERIFICATION
+    verification_status = RuleVerificationStatus.VERIFIED
 
     DEFAULT_MIN_RATIO = 0.10       # 10% of floor area
     DEFAULT_ASSUMED_WINDOW_HEIGHT = 1.2  # 1.2m default window height if 2D only
